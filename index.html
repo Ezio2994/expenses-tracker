@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Expenses Tracker</title>
+</head>
+
+<body>
+    <header>
+    </header>
+    <main>
+        <section class="top">
+            <section class="resume">
+                <div class="incomes">
+                    <h2>Fixed Incomes/Expenses & Savings</h2>
+                    <p>Fix incomes: £<input class="displayValues" type="number" readonly value="0" name="displaysalary"
+                            id="displaysalary">
+                    </p>
+                    <p>Other incomes: £<input class="displayValues" type="number" readonly value="0"
+                            name="displayothers" id="displayothers">
+                    </p>
+                    <p>Amount you wish to save: £<input class="displayValues" type="number" readonly value="0"
+                            name="displaysavings" id="displaysavings"></p>
+                    <p>Rent/Morgage: £<input class="displayValues" type="number" readonly value="0" name="displayrent"
+                            id="displayRent">
+                    </p>
+                    <h3>Others bills:</h3>
+                </div>
+                <div>
+                    <h2>Daily Incomes/Expenses</h2>
+                </div>
+            </section>
+            <div class="chart">
+                <h2>Spending/Savings percentages</h2>
+                <canvas id="myChart"></canvas>
+            </div>
+        </section>
+        <section class="inputData">
+            <div class="setDataAreas">
+                <article>
+                    <label class="dataLabels" for="salary">Salary:</label>
+                    <input class="dataInputs" type="number" min="1" step="any" id="salary" name="salary">
+                </article>
+                <article>
+                    <label class="dataLabels" for="others">Other fix incomes:</label>
+                    <input class="dataInputs" type="number" min="1" step="any" id="others" name="others">
+                </article>
+                <article>
+                    <label class="dataLabels" for="savings">Savings</label>
+                    <input class="dataInputs" type="number" min="1" step="any" id="savings" name="savings">
+                </article>
+                <article>
+                    <label class="dataLabels" for="rent">Rent/Morgage:</label>
+                    <input class="dataInputs" type="number" min="1" step="any" id="rent" name="rent">
+                </article>
+                <h2>Add other bills:</h2>
+                <div class="otherFixed">
+                    <div class="othersList">
+
+                    </div>
+                    <form class="newData">
+                        <input type="text" name="newData" id="newData" required>
+                        <input id="submit" type="submit" value="Add">
+                    </form>
+                </div>
+                <input class="submit" type="submit" value="Submit">
+            </div>
+            <div class="setDataAreas">
+                <div class="dailyIncomeExpenseList">
+
+                </div>
+                <form id="addNewDailyInputs">
+                    <article>
+                        <label for="incomse">Income</label>
+                        <input checked type="radio" name="type" id="income">
+                        <label for="expense">Expense</label>
+                        <input type="radio" name="type" id="expense">
+                    </article>
+                    <article>
+                        <label for="newItem">Name:</label>
+                        <input type="text" name="newItem" id="newItem">
+                    </article>
+                    <article>
+                        <label for="price">Price:</label>
+                        <input type="number" name="price" id="price"> £
+                    </article>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <button>Set fixed incomes</button>
+        <button>Add Daily Incomes/Expenses</button>
+    </footer>
+
+
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>
