@@ -11,11 +11,13 @@ const moreList = document.querySelector(".othersList")
 const addMore = document.querySelector("#submit")
 const newDataInput = document.querySelector(".newData input")
 const addNewDailyInputs = document.querySelectorAll("#addNewDailyInputs input")
+const dailyIncomeExpenseList = document.querySelector(".dailyIncomeExpenseList")
 
 const month = (new Date).getMonth() + 1
 const year = (new Date).getFullYear()
 const date = `${month}-${year}`
-let dataBasedata;
+let dataBaseFixed;
+let dataBaseDaily;
 
 
 var firebaseConfig = {
@@ -47,16 +49,19 @@ const chart = new Chart(ctx, {
     options: {}
 });
 
-const addData = (data) => {
+const addData = () => {
     chart.data.labels = []
     chart.data.datasets[0].data = []
-    const dataLab = Object.keys(data)
-    const dataValue = Object.values(data)
-    const total = data.salary + data.others;
+    const dataLab = Object.keys(dataBaseFixed)
+    const dataValue = Object.values(dataBaseFixed)
+    const total = dataBaseFixed.salary + dataBaseFixed.others;
     console.log(dataLab);
     let labels = [];
     let values = [];
     let dataToOrder = [];
+
+    // console.log(dataBaseDaily);
+
 
 
     for (let i = 0; i < dataLab.length; i++) {
@@ -73,17 +78,25 @@ const addData = (data) => {
     })
 
     for (let index = 0; index < chart.data.labels.length; index++) {
-        values.push(data[[labels[index]]]);
+        values.push(dataBaseFixed[[labels[index]]]);
+    }
+
+    if (dataBaseDaily) {
+        const dailyIE = Object.values(dataBaseDaily).reduce((a, b) => a + b)
+        chart.data.labels.push("Daily Expenses")
+        values.push(dailyIE)
     }
 
     budget = total - values.reduce((a, b) => a + b)
     chart.data.labels.push("Budget")
     values.push(budget)
 
+
     values.forEach(value => {
         const percentage = value / total * 100;
         chart.data.datasets[0].data.push(Math.round(percentage))
     })
+
 
     chart.update();
 
@@ -121,9 +134,12 @@ addMore.addEventListener("click", (e) => {
 
 })
 
+let dailyPrinted = false;
+
 const updateInputs = () => {
-    const dataLab = Object.keys(dataBasedata)
+    const dataLab = Object.keys(dataBaseFixed)
     const dataToAdd = []
+    const dailyDataToAdd = []
 
     console.log(dataInputs);
     console.log(savedInputs);
@@ -150,6 +166,14 @@ const updateInputs = () => {
         <p>${data}: £<input class="displayValues" type="number" readonly value="0" name="display${data}" id="display${data}"></p>`
     })
     updateSavedInputs()
+
+    if (dailyPrinted === false && dataBaseDaily !== undefined) {
+        for (let i = 0; i < Object.keys(dataBaseDaily).length; i++) {
+            dailyIncomeExpenseList.innerHTML += `
+        <p>${Object.keys(dataBaseDaily)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDaily)[i]}" name="display${Object.keys(dataBaseDaily)[i]}" id="display${Object.keys(dataBaseDaily)[i]}"></p>`
+        }
+        dailyPrinted = true
+    }
 }
 
 const updateSavedInputs = () => {
@@ -166,16 +190,30 @@ const dailyRef = db.collection("expenses").doc("Ezio").collection("Daily Incomes
 const getNewDatas = () => {
     fixedRef.get().then(function (doc) {
         if (doc.exists) {
-            dataBasedata = doc.data()
-            addData(doc.data())
+            dataBaseFixed = doc.data()
+            addData()
             updateInputs()
             updateValues(doc.data())
+            console.log(dataBaseFixed);
         } else {
             console.log("No such document!");
         }
     }).catch(function (error) {
         console.log("Error getting document:", error);
     });
+
+    dailyRef.get().then(function (doc) {
+        if (doc.exists) {
+            dataBaseDaily = doc.data()
+            addData()
+            updateInputs()
+        } else {
+            console.log("No such document!");
+        }
+    }).catch(function (error) {
+        console.log("Error getting document:", error);
+    });
+
 
 }
 
@@ -270,6 +308,11 @@ addNewDailyInputs[4].addEventListener("click", (e) => {
             }
         }
     })
+    getNewDatas()
+
+    dailyIncomeExpenseList.innerHTML += `
+    <p>${addNewDailyInputs[2].value}: £<input class="displayValues" type="number" readonly value="${addNewDailyInputs[1].checked ? -addNewDailyInputs[3].value : addNewDailyInputs[3].value}" name="display${addNewDailyInputs[2].value}" id="display${addNewDailyInputs[2].value}"></p>`
+
 })
 
 
