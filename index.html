@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/208e14b18c.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
     <title>Expenses Tracker</title>
 </head>
@@ -29,8 +30,13 @@
                     </p>
                     <h3>Others bills:</h3>
                 </div>
-                <div class="dailyIncomeExpenseList">
-                    <h2>Daily Incomes/Expenses</h2>
+                <div class="dailyIncomesList">
+                    <h2>Daily Incomes</h2>
+
+                </div>
+                <br>
+                <h2>Daily Expenses</h2>
+                <div class="dailyExpensesList">
 
                 </div>
             </section>
@@ -41,6 +47,7 @@
         </section>
         <section class="inputData">
             <div class="setDataAreas">
+                <button><i class="far fa-times-circle"></i></button>
                 <article>
                     <label class="dataLabels" for="salary">Salary:</label>
                     <input class="dataInputs" type="number" min="1" step="any" id="salary" name="salary">
@@ -70,13 +77,8 @@
                 <input class="submit" type="submit" value="Submit">
             </div>
             <div class="setDataAreas">
+                <button><i class="far fa-times-circle"></i></button>
                 <form id="addNewDailyInputs">
-                    <article>
-                        <label for="incomse">Income</label>
-                        <input checked type="radio" name="type" id="income">
-                        <label for="expense">Expense</label>
-                        <input type="radio" name="type" id="expense">
-                    </article>
                     <article>
                         <label for="newItem">Name:</label>
                         <input type="text" name="newItem" id="newItem">
@@ -92,7 +94,7 @@
     </main>
     <footer>
         <button>Set fixed incomes</button>
-        <button>Add Daily Incomes/Expenses</button>
+        <button>Add Daily Expenses</button>
     </footer>
 
 

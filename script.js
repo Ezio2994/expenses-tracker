@@ -4,6 +4,7 @@ const buttons = document.querySelectorAll("footer button")
 const dataAreas = document.querySelectorAll(".setDataAreas")
 const dataLabels = document.getElementsByClassName("dataLabels")
 const dataInputs = document.getElementsByClassName("dataInputs")
+const dailyExpensesSelector = document.getElementsByClassName("remove")
 const submitData = document.querySelectorAll(".submit")
 const list = document.querySelector(".incomes")
 const inputDatas = document.querySelector(".inputData")
@@ -11,7 +12,8 @@ const moreList = document.querySelector(".othersList")
 const addMore = document.querySelector("#submit")
 const newDataInput = document.querySelector(".newData input")
 const addNewDailyInputs = document.querySelectorAll("#addNewDailyInputs input")
-const dailyIncomeExpenseList = document.querySelector(".dailyIncomeExpenseList")
+const dailyExpensesList = document.querySelector(".dailyExpensesList")
+const closeWindow = document.querySelectorAll(".setDataAreas button")
 
 const month = (new Date).getMonth() + 1
 const year = (new Date).getFullYear()
@@ -54,13 +56,11 @@ const addData = () => {
     chart.data.datasets[0].data = []
     const dataLab = Object.keys(dataBaseFixed)
     const dataValue = Object.values(dataBaseFixed)
-    const total = dataBaseFixed.salary + dataBaseFixed.others;
+    const total = dataBaseFixed.others ? dataBaseFixed.salary + dataBaseFixed.others : dataBaseFixed.salary;
     console.log(dataLab);
     let labels = [];
     let values = [];
     let dataToOrder = [];
-
-    // console.log(dataBaseDaily);
 
 
 
@@ -82,14 +82,18 @@ const addData = () => {
     }
 
     if (dataBaseDaily) {
-        const dailyIE = Object.values(dataBaseDaily).reduce((a, b) => a + b)
+        const dailyIE = Object.values(dataBaseDaily).length ? Object.values(dataBaseDaily).reduce((a, b) => a + b) : null
         chart.data.labels.push("Daily Expenses")
         values.push(dailyIE)
     }
+    console.log(values);
+
 
     budget = total - values.reduce((a, b) => a + b)
     chart.data.labels.push("Budget")
     values.push(budget)
+    console.log(budget);
+    console.log(values);
 
 
     values.forEach(value => {
@@ -139,12 +143,7 @@ let dailyPrinted = false;
 const updateInputs = () => {
     const dataLab = Object.keys(dataBaseFixed)
     const dataToAdd = []
-    const dailyDataToAdd = []
-
-    console.log(dataInputs);
-    console.log(savedInputs);
-    console.log(dataLab);
-
+    dailyExpensesList.innerHTML = ''
 
     dataLab.forEach(data => {
         if (!savedInputs.includes(data)) {
@@ -152,8 +151,6 @@ const updateInputs = () => {
             console.log(data);
         }
     })
-
-    console.log(dataToAdd);
 
     dataToAdd.forEach(data => {
         moreList.innerHTML += `
@@ -167,14 +164,24 @@ const updateInputs = () => {
     })
     updateSavedInputs()
 
-    if (dailyPrinted === false && dataBaseDaily !== undefined) {
+    if (dataBaseDaily) {
         for (let i = 0; i < Object.keys(dataBaseDaily).length; i++) {
-            dailyIncomeExpenseList.innerHTML += `
-        <p>${Object.keys(dataBaseDaily)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDaily)[i]}" name="display${Object.keys(dataBaseDaily)[i]}" id="display${Object.keys(dataBaseDaily)[i]}"></p>`
+            dailyExpensesList.innerHTML += `
+        <p class="dailyExpensesSelector"><button value="${Object.keys(dataBaseDaily)[i]}"><i class="fas fa-minus-circle"></i></button> ${Object.keys(dataBaseDaily)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDaily)[i]}" name="${Object.keys(dataBaseDaily)[i]}" id="display${Object.keys(dataBaseDaily)[i]}"></p>`
         }
-        dailyPrinted = true
     }
 }
+
+
+dailyExpensesList.addEventListener("click", (e) => {
+    console.log(e.target.tagName);
+    if (e.target.tagName === "BUTTON") {
+        dailyRef.update({
+            [e.target.value]: firebase.firestore.FieldValue.delete()
+        })
+        setTimeout(getNewDatas, 50)
+    }
+})
 
 const updateSavedInputs = () => {
     for (let i = 0; i < dataInputs.length; i++) {
@@ -183,7 +190,7 @@ const updateSavedInputs = () => {
 }
 
 const fixedRef = db.collection("expenses").doc("Ezio").collection("Fixed Incomes-Expenses").doc(date);
-const dailyRef = db.collection("expenses").doc("Ezio").collection("Daily Incomes-Expenses").doc(date);
+const dailyRef = db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date);
 
 
 
@@ -287,33 +294,42 @@ submitData.forEach(submit => {
     })
 })
 
-addNewDailyInputs[4].addEventListener("click", (e) => {
+addNewDailyInputs[2].addEventListener("click", (e) => {
     e.preventDefault()
-    const type = addNewDailyInputs[1].checked ? addNewDailyInputs[1].id : addNewDailyInputs[0].id
+    const isObject = dataBaseDaily ? Object.keys(dataBaseDaily) : "null"
 
-    dailyRef.get().then(function (doc) {
-        if (!doc.exists) {
-            db.collection("expenses").doc("Ezio").collection("Daily Incomes-Expenses").doc(date).set({
-                [addNewDailyInputs[2].value]: Number(addNewDailyInputs[3].value)
-            })
-        } else {
-            if (type === "income") {
-                db.collection("expenses").doc("Ezio").collection("Daily Incomes-Expenses").doc(date).update({
-                    [addNewDailyInputs[2].value]: Number(addNewDailyInputs[3].value)
+    if (isObject.includes(addNewDailyInputs[0].value)) {
+        db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date).update({
+            [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value) + Number(dataBaseDaily[[addNewDailyInputs[0].value]])
+        })
+
+    } else {
+
+        dailyRef.get().then(function (doc) {
+            if (!doc.exists) {
+                db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date).set({
+                    [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
                 })
             } else {
-                db.collection("expenses").doc("Ezio").collection("Daily Incomes-Expenses").doc(date).update({
-                    [addNewDailyInputs[2].value]: Number(-addNewDailyInputs[3].value)
+                db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date).update({
+                    [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
                 })
             }
-        }
-    })
-    getNewDatas()
+        })
+    }
+    setTimeout(getNewDatas, 2000)
 
-    dailyIncomeExpenseList.innerHTML += `
-    <p>${addNewDailyInputs[2].value}: £<input class="displayValues" type="number" readonly value="${addNewDailyInputs[1].checked ? -addNewDailyInputs[3].value : addNewDailyInputs[3].value}" name="display${addNewDailyInputs[2].value}" id="display${addNewDailyInputs[2].value}"></p>`
+    // dailyExpensesList.innerHTML += `
+    // <p>${addNewDailyInputs[0].value}: £<input class="displayValues" type="number" readonly value="${addNewDailyInputs[1].value}" name="display${addNewDailyInputs[0].value}" id="display${addNewDailyInputs[0].value}"></p>`
+
+    setTimeout(clearInputs, 500)
 
 })
+
+const clearInputs = () => {
+    addNewDailyInputs[0].value = ""
+    addNewDailyInputs[1].value = ""
+}
 
 
 buttons.forEach(button => {
@@ -323,11 +339,13 @@ buttons.forEach(button => {
 
         if (button.innerHTML === "Set fixed incomes") {
             dataAreas[0].style.display = "flex"
-        } else if (button.innerHTML === "Add Daily Incomes/Expenses") {
+        } else if (button.innerHTML === "Add Daily Expenses") {
             dataAreas[1].style.display = "flex"
         }
     })
 })
+
+closeWindow.forEach(button => button.addEventListener("click", () => inputDatas.style.display = "none"))
 
 
 
