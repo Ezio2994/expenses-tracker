@@ -17,6 +17,7 @@ const addNewDailyHeader = document.querySelector("#addNewDailyInputs h2")
 const dailyExpensesList = document.querySelector(".dailyExpensesList")
 const dailyIncomesList = document.querySelector(".dailyIncomesList")
 const closeWindow = document.querySelectorAll(".setDataAreas button")
+const reportInputs = document.querySelectorAll(".report input")
 
 const month = (new Date).getMonth() + 1
 const year = (new Date).getFullYear()
@@ -24,8 +25,10 @@ const date = `${month}-${year}`
 let dataBaseFixed;
 let dataBaseDailyExpenses;
 let dataBaseDailyIncomes;
-let usersRef;
-
+let userId;
+let fixedRef;
+let dailyExpensesRef;
+let dailyIncomesRef;
 
 
 var firebaseConfig = {
@@ -48,13 +51,16 @@ const signIn = () => {
     getUser()
 }
 
-signInButton.onclick = () => signIn()
+const signOut = () => {
+    firebase.auth().signOut().then(() => {
+        window.location.reload()
+    }).catch((error) => {
+        console.log(error);
+    });
+}
 
-let userId;
+signInButton.onclick = () => signInButton.innerHTML === "SignIn" ? signIn() : signOut()
 
-let fixedRef;
-let dailyExpensesRef;
-let dailyIncomesRef;
 
 
 
@@ -63,15 +69,16 @@ const getUser = () => {
         if (user) {
             console.log(user.uid);
             userId = user.uid
+            signInButton.innerHTML = "SignOut"
             updateRef()
         } else {
             userId = undefined
+            signInButton.innerHTML = "SignIn"
         }
     });
 };
 
 const updateRef = () => {
-    usersRef = db.collection("users").doc(userId)
     fixedRef = db.collection("users").doc(userId).collection("Fixed Incomes-Expenses").doc(date); dailyExpensesRef = db.collection("users").doc(userId).collection("Daily Expenses").doc(date);
     dailyIncomesRef = db.collection("users").doc(userId).collection("Daily Incomes").doc(date);
     createNewUserDataBase()
@@ -98,10 +105,6 @@ const createNewUserDataBase = () => {
     }
 }
 
-getUser()
-
-
-
 const chart = new Chart(ctx, {
     type: 'pie',
 
@@ -109,7 +112,7 @@ const chart = new Chart(ctx, {
         labels: [],
         datasets: [{
             label: 'My First dataset',
-            backgroundColor: ["blue", "red", "orange", "yellow", "green", "pink", "lightblue"],
+            backgroundColor: ["blue", "red", "orange", "yellow", "lightgreen", "pink", "lightblue"],
             borderColor: 'black',
             data: []
         }]
@@ -160,7 +163,9 @@ const addData = () => {
 
 
     budget = values.length ? total - values.reduce((a, b) => a + b) : total
-    chart.data.labels.push("Budget")
+    reportInputs[0].value = dataBaseFixed.savings + budget
+    reportInputs[1].value = budget
+    chart.data.labels.push("Left Over")
     values.push(budget)
     console.log(budget);
     console.log(values);
@@ -259,7 +264,7 @@ const deleteValue = (e, whichRef) => {
         reference.update({
             [e.target.value]: firebase.firestore.FieldValue.delete()
         })
-        setTimeout(getNewDatas, 100)
+        setTimeout(getNewDatas, 500)
     }
 }
 
@@ -446,3 +451,5 @@ buttons.forEach(button => {
 
 closeWindow.forEach(button => button.addEventListener("click", () => inputDatas.style.display = "none"))
 
+
+getUser()
