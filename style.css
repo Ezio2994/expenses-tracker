@@ -20,24 +20,28 @@
           align-items: center;
 }
 
-.top .resume {
-  min-width: 300px;
+.top input {
+  border: none;
 }
 
-.top .resume .dailyExpensesList button {
+.top button {
   border: none;
   cursor: pointer;
 }
 
-.top .resume .dailyExpensesList button svg {
+.top button svg {
   pointer-events: none;
 }
 
-.top .resume div {
+.top button .resume {
+  min-width: 300px;
+}
+
+.top button div {
   width: 100%;
 }
 
-.top .resume div input {
+.top button div input {
   border: none;
 }
 

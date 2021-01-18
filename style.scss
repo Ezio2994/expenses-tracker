@@ -11,19 +11,21 @@
     justify-content: space-evenly;
     align-items: center;
 
+    input {
+        border: none;
+    }
+
+    button {
+        border: none;
+        cursor: pointer;
+
+        svg {
+            pointer-events: none;
+        }
+
     .resume {
         min-width: 300px;
-
-        .dailyExpensesList {
-            button {
-                border: none;
-                cursor: pointer;
-
-                svg {
-                    pointer-events: none;
-                }
-            }
-        }
+    }
 
         div {
             width: 100%;

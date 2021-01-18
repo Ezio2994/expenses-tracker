@@ -12,14 +12,17 @@ const moreList = document.querySelector(".othersList")
 const addMore = document.querySelector("#submit")
 const newDataInput = document.querySelector(".newData input")
 const addNewDailyInputs = document.querySelectorAll("#addNewDailyInputs input")
+const addNewDailyHeader = document.querySelector("#addNewDailyInputs h2")
 const dailyExpensesList = document.querySelector(".dailyExpensesList")
+const dailyIncomesList = document.querySelector(".dailyIncomesList")
 const closeWindow = document.querySelectorAll(".setDataAreas button")
 
 const month = (new Date).getMonth() + 1
 const year = (new Date).getFullYear()
 const date = `${month}-${year}`
 let dataBaseFixed;
-let dataBaseDaily;
+let dataBaseDailyExpenses;
+let dataBaseDailyIncomes;
 
 
 var firebaseConfig = {
@@ -56,11 +59,15 @@ const addData = () => {
     chart.data.datasets[0].data = []
     const dataLab = Object.keys(dataBaseFixed)
     const dataValue = Object.values(dataBaseFixed)
-    const total = dataBaseFixed.others ? dataBaseFixed.salary + dataBaseFixed.others : dataBaseFixed.salary;
-    console.log(dataLab);
+    console.log(dataBaseDailyIncomes);
+    let total = dataBaseFixed.others ? dataBaseFixed.salary + dataBaseFixed.others : dataBaseFixed.salary;
+    const moreIncomes = dataBaseDailyIncomes !== undefined && Object.values(dataBaseDailyIncomes).length ? Object.values(dataBaseDailyIncomes).reduce((a, b) => a + b) : 0
     let labels = [];
     let values = [];
     let dataToOrder = [];
+
+
+    total = total + moreIncomes
 
 
 
@@ -81,8 +88,8 @@ const addData = () => {
         values.push(dataBaseFixed[[labels[index]]]);
     }
 
-    if (dataBaseDaily) {
-        const dailyIE = Object.values(dataBaseDaily).length ? Object.values(dataBaseDaily).reduce((a, b) => a + b) : null
+    if (dataBaseDailyExpenses) {
+        const dailyIE = Object.values(dataBaseDailyExpenses).length ? Object.values(dataBaseDailyExpenses).reduce((a, b) => a + b) : null
         chart.data.labels.push("Daily Expenses")
         values.push(dailyIE)
     }
@@ -144,6 +151,7 @@ const updateInputs = () => {
     const dataLab = Object.keys(dataBaseFixed)
     const dataToAdd = []
     dailyExpensesList.innerHTML = ''
+    dailyIncomesList.innerHTML = ""
 
     dataLab.forEach(data => {
         if (!savedInputs.includes(data)) {
@@ -164,24 +172,36 @@ const updateInputs = () => {
     })
     updateSavedInputs()
 
-    if (dataBaseDaily) {
-        for (let i = 0; i < Object.keys(dataBaseDaily).length; i++) {
+    if (dataBaseDailyExpenses) {
+        for (let i = 0; i < Object.keys(dataBaseDailyExpenses).length; i++) {
             dailyExpensesList.innerHTML += `
-        <p class="dailyExpensesSelector"><button value="${Object.keys(dataBaseDaily)[i]}"><i class="fas fa-minus-circle"></i></button> ${Object.keys(dataBaseDaily)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDaily)[i]}" name="${Object.keys(dataBaseDaily)[i]}" id="display${Object.keys(dataBaseDaily)[i]}"></p>`
+        <p class="dailyExpensesSelector"><button value="${Object.keys(dataBaseDailyExpenses)[i]}"><i class="fas fa-minus-circle"></i></button> ${Object.keys(dataBaseDailyExpenses)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDailyExpenses)[i]}" name="${Object.keys(dataBaseDailyExpenses)[i]}" id="display${Object.keys(dataBaseDailyExpenses)[i]}"></p>`
+        }
+    }
+
+    if (dataBaseDailyIncomes) {
+        for (let i = 0; i < Object.keys(dataBaseDailyIncomes).length; i++) {
+            dailyIncomesList.innerHTML += `
+        <p class="dailyExpensesSelector"><button value="${Object.keys(dataBaseDailyIncomes)[i]}"><i class="fas fa-minus-circle"></i></button> ${Object.keys(dataBaseDailyIncomes)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDailyIncomes)[i]}" name="${Object.keys(dataBaseDailyIncomes)[i]}" id="display${Object.keys(dataBaseDailyIncomes)[i]}"></p>`
         }
     }
 }
 
 
-dailyExpensesList.addEventListener("click", (e) => {
-    console.log(e.target.tagName);
+const deleteValue = (e, whichRef) => {
+    const reference = whichRef === "expenses" ? dailyExpensesRef : dailyIncomesRef
+
     if (e.target.tagName === "BUTTON") {
-        dailyRef.update({
+        reference.update({
             [e.target.value]: firebase.firestore.FieldValue.delete()
         })
         setTimeout(getNewDatas, 50)
     }
-})
+}
+
+dailyExpensesList.addEventListener("click", (e) => deleteValue(e, "expenses"))
+dailyIncomesList.addEventListener("click", (e) => deleteValue(e, "incomes"))
+
 
 const updateSavedInputs = () => {
     for (let i = 0; i < dataInputs.length; i++) {
@@ -190,7 +210,9 @@ const updateSavedInputs = () => {
 }
 
 const fixedRef = db.collection("expenses").doc("Ezio").collection("Fixed Incomes-Expenses").doc(date);
-const dailyRef = db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date);
+const dailyExpensesRef = db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date);
+const dailyIncomesRef = db.collection("expenses").doc("Ezio").collection("Daily Incomes").doc(date);
+
 
 
 
@@ -209,9 +231,21 @@ const getNewDatas = () => {
         console.log("Error getting document:", error);
     });
 
-    dailyRef.get().then(function (doc) {
+    dailyExpensesRef.get().then(function (doc) {
         if (doc.exists) {
-            dataBaseDaily = doc.data()
+            dataBaseDailyExpenses = doc.data()
+            addData()
+            updateInputs()
+        } else {
+            console.log("No such document!");
+        }
+    }).catch(function (error) {
+        console.log("Error getting document:", error);
+    });
+
+    dailyIncomesRef.get().then(function (doc) {
+        if (doc.exists) {
+            dataBaseDailyIncomes = doc.data()
             addData()
             updateInputs()
         } else {
@@ -296,27 +330,33 @@ submitData.forEach(submit => {
 
 addNewDailyInputs[2].addEventListener("click", (e) => {
     e.preventDefault()
-    const isObject = dataBaseDaily ? Object.keys(dataBaseDaily) : "null"
+    const isObject = dataBaseDailyExpenses ? Object.keys(dataBaseDailyExpenses) : "null"
+    const isExpenses = addNewDailyHeader.innerHTML === "Add Daily Expenses" ?
+        db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date) :
+        db.collection("expenses").doc("Ezio").collection("Daily Incomes").doc(date)
+    const isExpensesRef = addNewDailyHeader.innerHTML === "Add Daily Expenses" ? dailyExpensesRef : dailyIncomesRef
 
-    if (isObject.includes(addNewDailyInputs[0].value)) {
-        db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date).update({
-            [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value) + Number(dataBaseDaily[[addNewDailyInputs[0].value]])
-        })
 
-    } else {
 
-        dailyRef.get().then(function (doc) {
-            if (!doc.exists) {
-                db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date).set({
-                    [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
-                })
-            } else {
-                db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date).update({
-                    [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
-                })
-            }
-        })
-    }
+    // if (isObject.includes(addNewDailyInputs[0].value)) {
+    //     db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date).update({
+    //         [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value) + Number(dataBaseDaily[[addNewDailyInputs[0].value]])
+    //     })
+
+    // } else {
+
+    isExpensesRef.get().then(function (doc) {
+        if (!doc.exists) {
+            isExpenses.set({
+                [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
+            })
+        } else {
+            isExpenses.update({
+                [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
+            })
+        }
+    })
+    // }
     setTimeout(getNewDatas, 2000)
 
     // dailyExpensesList.innerHTML += `
@@ -341,6 +381,10 @@ buttons.forEach(button => {
             dataAreas[0].style.display = "flex"
         } else if (button.innerHTML === "Add Daily Expenses") {
             dataAreas[1].style.display = "flex"
+            addNewDailyHeader.innerHTML = "Add Daily Expenses"
+        } else if (button.innerHTML === "Add Daily Incomes") {
+            dataAreas[1].style.display = "flex"
+            addNewDailyHeader.innerHTML = "Add Daily Incomes"
         }
     })
 })
