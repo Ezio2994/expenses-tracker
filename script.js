@@ -24,6 +24,8 @@ const date = `${month}-${year}`
 let dataBaseFixed;
 let dataBaseDailyExpenses;
 let dataBaseDailyIncomes;
+let usersRef;
+
 
 
 var firebaseConfig = {
@@ -49,7 +51,11 @@ const signIn = () => {
 signInButton.onclick = () => signIn()
 
 let userId;
-const usersRef = db.collection("users")
+
+let fixedRef;
+let dailyExpensesRef;
+let dailyIncomesRef;
+
 
 
 const getUser = () => {
@@ -57,22 +63,29 @@ const getUser = () => {
         if (user) {
             console.log(user.uid);
             userId = user.uid
-            createNewUserDataBase()
+            updateRef()
         } else {
             userId = undefined
         }
     });
 };
 
+const updateRef = () => {
+    usersRef = db.collection("users").doc(userId)
+    fixedRef = db.collection("users").doc(userId).collection("Fixed Incomes-Expenses").doc(date); dailyExpensesRef = db.collection("users").doc(userId).collection("Daily Expenses").doc(date);
+    dailyIncomesRef = db.collection("users").doc(userId).collection("Daily Incomes").doc(date);
+    createNewUserDataBase()
+    getNewDatas()
+    updateSavedInputs()
+
+}
+
 const createNewUserDataBase = () => {
     if (userId) {
-        usersRef.get().then(function (doc) {
-            if (doc.exists) {
-                console.log("nada");
-                null
-            } else {
-                "un altro"
-                usersRef.doc(userId).collection("Fixed Incomes-Expenses").doc(date).set({
+        fixedRef.get().then(function (doc) {
+            console.log(doc.data());
+            if (!doc.exists) {
+                fixedRef.set({
                     others: 0,
                     rent: 0,
                     salary: 0,
@@ -86,6 +99,8 @@ const createNewUserDataBase = () => {
 }
 
 getUser()
+
+
 
 const chart = new Chart(ctx, {
     type: 'pie',
@@ -257,10 +272,6 @@ const updateSavedInputs = () => {
         savedInputs.push(dataInputs[i].name)
     }
 }
-
-const fixedRef = db.collection("users").doc(userId).collection("Fixed Incomes-Expenses").doc(date);
-const dailyExpensesRef = db.collection("users").doc(userId).collection("Daily Expenses").doc(date);
-const dailyIncomesRef = db.collection("users").doc(userId).collection("Daily Incomes").doc(date);
 
 const getNewDatas = () => {
     fixedRef.get().then(function (doc) {
@@ -434,9 +445,4 @@ buttons.forEach(button => {
 })
 
 closeWindow.forEach(button => button.addEventListener("click", () => inputDatas.style.display = "none"))
-
-
-
-getNewDatas()
-updateSavedInputs()
 
