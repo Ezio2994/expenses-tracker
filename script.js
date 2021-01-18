@@ -1,3 +1,4 @@
+const signInButton = document.querySelector("header button")
 const ctx = document.getElementById('myChart').getContext('2d');
 const displayDatas = document.getElementsByClassName("displayValues")
 const buttons = document.querySelectorAll("footer button")
@@ -38,6 +39,54 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
+var provider = new firebase.auth.GoogleAuthProvider();
+
+const signIn = () => {
+    firebase.auth().signInWithRedirect(provider);
+    getUser()
+}
+
+signInButton.onclick = () => signIn()
+
+let userId;
+const usersRef = db.collection("users")
+
+
+const getUser = () => {
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            console.log(user.uid);
+            userId = user.uid
+            createNewUserDataBase()
+        } else {
+            userId = undefined
+        }
+    });
+};
+
+const createNewUserDataBase = () => {
+    if (userId) {
+        usersRef.get().then(function (doc) {
+            if (doc.exists) {
+                console.log("nada");
+                null
+            } else {
+                "un altro"
+                usersRef.doc(userId).collection("Fixed Incomes-Expenses").doc(date).set({
+                    others: 0,
+                    rent: 0,
+                    salary: 0,
+                    savings: 0
+                })
+            }
+        }).catch(function (error) {
+            console.log("Error getting document:", error);
+        });
+    }
+}
+
+getUser()
+
 const chart = new Chart(ctx, {
     type: 'pie',
 
@@ -57,8 +106,8 @@ const chart = new Chart(ctx, {
 const addData = () => {
     chart.data.labels = []
     chart.data.datasets[0].data = []
-    const dataLab = Object.keys(dataBaseFixed)
-    const dataValue = Object.values(dataBaseFixed)
+    const dataLab = dataBaseFixed ? Object.keys(dataBaseFixed) : null
+    const dataValue = dataBaseFixed ? Object.values(dataBaseFixed) : null
     let total = dataBaseFixed.others ? dataBaseFixed.salary + dataBaseFixed.others : dataBaseFixed.salary;
     const moreIncomes = dataBaseDailyIncomes !== undefined && Object.values(dataBaseDailyIncomes).length ? Object.values(dataBaseDailyIncomes).reduce((a, b) => a + b) : 0
     let labels = [];
@@ -88,14 +137,14 @@ const addData = () => {
     }
 
     if (dataBaseDailyExpenses) {
-        const dailyIE = Object.values(dataBaseDailyExpenses).length ? Object.values(dataBaseDailyExpenses).reduce((a, b) => a + b) : null
+        const dailyIE = Object.values(dataBaseDailyExpenses).length ? Object.values(dataBaseDailyExpenses).reduce((a, b) => a + b) : 0
         chart.data.labels.push("Daily Expenses")
         values.push(dailyIE)
     }
     console.log(values);
 
 
-    budget = total - values.reduce((a, b) => a + b)
+    budget = values.length ? total - values.reduce((a, b) => a + b) : total
     chart.data.labels.push("Budget")
     values.push(budget)
     console.log(budget);
@@ -123,6 +172,7 @@ addMore.addEventListener("click", (e) => {
     }
 
     if (newDataInput.value !== "") {
+        newDataInput.value = newDataInput.value.includes("/") ? newDataInput.value.replace("/", "-") : newDataInput.value
         moreList.innerHTML += `
             <article>
                 <label class="dataLabels" for="${newDataInput.value}">${newDataInput.value}:</label>
@@ -208,9 +258,9 @@ const updateSavedInputs = () => {
     }
 }
 
-const fixedRef = db.collection("expenses").doc("Ezio").collection("Fixed Incomes-Expenses").doc(date);
-const dailyExpensesRef = db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date);
-const dailyIncomesRef = db.collection("expenses").doc("Ezio").collection("Daily Incomes").doc(date);
+const fixedRef = db.collection("users").doc(userId).collection("Fixed Incomes-Expenses").doc(date);
+const dailyExpensesRef = db.collection("users").doc(userId).collection("Daily Expenses").doc(date);
+const dailyIncomesRef = db.collection("users").doc(userId).collection("Daily Incomes").doc(date);
 
 const getNewDatas = () => {
     fixedRef.get().then(function (doc) {
@@ -284,15 +334,17 @@ class FixedIncomes {
     }
 
     addToDatabase(value, name) {
+        // name = name.includes("/") ? name.replace("/", "-") : name
         fixedRef.get().then(function (doc) {
             if (doc.exists) {
-                db.collection("expenses").doc("Ezio").collection("Fixed Incomes-Expenses").doc(date).update({
+                fixedRef.update({
                     [name]: Number(value)
                 })
             } else {
-                db.collection("expenses").doc("Ezio").collection("Fixed Incomes-Expenses").doc(date).set({
+                fixedRef.set({
                     [name]: Number(value)
                 })
+                console.log(userId);
                 unused.push({ [name]: Number(value) })
                 setTimeout(recall, 1000)
             }
@@ -328,9 +380,7 @@ addNewDailyInputs[2].addEventListener("click", (e) => {
     e.preventDefault()
     const isExpensesObj = addNewDailyHeader.innerHTML === "Add Daily Expenses" ? dataBaseDailyExpenses : dataBaseDailyIncomes
     const isObject = isExpensesObj ? Object.keys(isExpensesObj) : "null"
-    const isExpenses = addNewDailyHeader.innerHTML === "Add Daily Expenses" ?
-        db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date) :
-        db.collection("expenses").doc("Ezio").collection("Daily Incomes").doc(date)
+    const isExpenses = addNewDailyHeader.innerHTML === "Add Daily Expenses" ? dailyExpensesRef : dailyIncomesRef
     const isExpensesRef = addNewDailyHeader.innerHTML === "Add Daily Expenses" ? dailyExpensesRef : dailyIncomesRef
 
 
