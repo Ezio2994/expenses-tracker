@@ -59,7 +59,6 @@ const addData = () => {
     chart.data.datasets[0].data = []
     const dataLab = Object.keys(dataBaseFixed)
     const dataValue = Object.values(dataBaseFixed)
-    console.log(dataBaseDailyIncomes);
     let total = dataBaseFixed.others ? dataBaseFixed.salary + dataBaseFixed.others : dataBaseFixed.salary;
     const moreIncomes = dataBaseDailyIncomes !== undefined && Object.values(dataBaseDailyIncomes).length ? Object.values(dataBaseDailyIncomes).reduce((a, b) => a + b) : 0
     let labels = [];
@@ -195,7 +194,7 @@ const deleteValue = (e, whichRef) => {
         reference.update({
             [e.target.value]: firebase.firestore.FieldValue.delete()
         })
-        setTimeout(getNewDatas, 50)
+        setTimeout(getNewDatas, 100)
     }
 }
 
@@ -212,9 +211,6 @@ const updateSavedInputs = () => {
 const fixedRef = db.collection("expenses").doc("Ezio").collection("Fixed Incomes-Expenses").doc(date);
 const dailyExpensesRef = db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date);
 const dailyIncomesRef = db.collection("expenses").doc("Ezio").collection("Daily Incomes").doc(date);
-
-
-
 
 const getNewDatas = () => {
     fixedRef.get().then(function (doc) {
@@ -330,7 +326,8 @@ submitData.forEach(submit => {
 
 addNewDailyInputs[2].addEventListener("click", (e) => {
     e.preventDefault()
-    const isObject = dataBaseDailyExpenses ? Object.keys(dataBaseDailyExpenses) : "null"
+    const isExpensesObj = addNewDailyHeader.innerHTML === "Add Daily Expenses" ? dataBaseDailyExpenses : dataBaseDailyIncomes
+    const isObject = isExpensesObj ? Object.keys(isExpensesObj) : "null"
     const isExpenses = addNewDailyHeader.innerHTML === "Add Daily Expenses" ?
         db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date) :
         db.collection("expenses").doc("Ezio").collection("Daily Incomes").doc(date)
@@ -338,30 +335,27 @@ addNewDailyInputs[2].addEventListener("click", (e) => {
 
 
 
-    // if (isObject.includes(addNewDailyInputs[0].value)) {
-    //     db.collection("expenses").doc("Ezio").collection("Daily Expenses").doc(date).update({
-    //         [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value) + Number(dataBaseDaily[[addNewDailyInputs[0].value]])
-    //     })
+    if (isObject.includes(addNewDailyInputs[0].value)) {
+        isExpensesRef.update({
+            [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value) + Number(isExpensesObj[[addNewDailyInputs[0].value]])
+        })
 
-    // } else {
+    } else {
 
-    isExpensesRef.get().then(function (doc) {
-        if (!doc.exists) {
-            isExpenses.set({
-                [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
-            })
-        } else {
-            isExpenses.update({
-                [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
-            })
-        }
-    })
-    // }
+        isExpensesRef.get().then(function (doc) {
+            if (!doc.exists) {
+                isExpenses.set({
+                    [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
+                })
+            } else {
+                isExpenses.update({
+                    [addNewDailyInputs[0].value]: Number(addNewDailyInputs[1].value)
+                })
+            }
+        })
+    }
+
     setTimeout(getNewDatas, 2000)
-
-    // dailyExpensesList.innerHTML += `
-    // <p>${addNewDailyInputs[0].value}: £<input class="displayValues" type="number" readonly value="${addNewDailyInputs[1].value}" name="display${addNewDailyInputs[0].value}" id="display${addNewDailyInputs[0].value}"></p>`
-
     setTimeout(clearInputs, 500)
 
 })
