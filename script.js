@@ -1,4 +1,4 @@
-const signInButton = document.querySelector("header button")
+const headerButtons = document.querySelectorAll("header button")
 const ctx = document.getElementById('myChart').getContext('2d');
 const displayDatas = document.getElementsByClassName("displayValues")
 const buttons = document.querySelectorAll("footer button")
@@ -7,7 +7,7 @@ const dataLabels = document.getElementsByClassName("dataLabels")
 const dataInputs = document.getElementsByClassName("dataInputs")
 const dailyExpensesSelector = document.getElementsByClassName("remove")
 const submitData = document.querySelectorAll(".submit")
-const list = document.querySelector(".incomes")
+const list = document.querySelector(".otherFixedExpenses")
 const inputDatas = document.querySelector(".inputData")
 const moreList = document.querySelector(".othersList")
 const addMore = document.querySelector("#submit")
@@ -18,8 +18,9 @@ const dailyExpensesList = document.querySelector(".dailyExpensesList")
 const dailyIncomesList = document.querySelector(".dailyIncomesList")
 const closeWindow = document.querySelectorAll(".setDataAreas button")
 const reportInputs = document.querySelectorAll(".report input")
+const reportsList = document.querySelector("#reportsList")
 
-const month = (new Date).getMonth() + 1
+const month = (new Date).getMonth() + 3;
 const year = (new Date).getFullYear()
 const date = `${month}-${year}`
 let dataBaseFixed;
@@ -60,7 +61,12 @@ const signOut = () => {
     });
 }
 
-signInButton.onclick = () => signInButton.innerHTML === "SignIn" ? signIn() : signOut()
+headerButtons[0].onclick = () => headerButtons.innerHTML === "SignIn" ? signIn() : signOut()
+headerButtons[1].onclick = () => {
+    inputDatas.style.display = "block"
+    dataAreas.forEach(dataAreas => dataAreas.style.display = "none")
+    dataAreas[2].style.display = "flex"
+}
 
 const getJSON = () => {
     const url = `https://api.astroip.co/2.99.115.173?api_key=a45dc99e-f914-4961-8009-54fca96d8819`
@@ -81,16 +87,16 @@ const getUser = () => {
         if (user) {
             console.log(user.uid);
             userId = user.uid
-            signInButton.innerHTML = "SignOut"
+            headerButtons[0].innerHTML = "SignOut"
             updateRef()
         } else {
             userId = undefined
-            signInButton.innerHTML = "SignIn"
-            console.log("done");
+            headerButtons[0].innerHTML = "SignIn"
             getJSON()
         }
     });
 };
+
 
 const updateRef = () => {
     const user = userId ? userId : userIp
@@ -102,7 +108,35 @@ const updateRef = () => {
     getNewDatas()
     updateSavedInputs()
 
+
+    db.collection("users").doc(user).collection("Fixed Incomes-Expenses").get().then((querySnapshot) => {
+
+        querySnapshot.docs.map((doc) => {
+            reportsList.innerHTML += `<option value="${doc.id}">${doc.id}</option>`
+        })
+    })
 }
+
+document.querySelector("#submitReport").addEventListener("click", () => {
+    buttons.forEach(button => button.style.display = "none")
+    console.log(reportsList.value);
+
+    const user = userId ? userId : userIp
+
+    fixedRef = db.collection("users").doc(user).collection("Fixed Incomes-Expenses").doc(reportsList.value);
+    dailyExpensesRef = db.collection("users").doc(user).collection("Daily Expenses").doc(reportsList.value);
+    dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(reportsList.value);
+
+    savedInputs = ["savings", "rent", "others", "salary"]
+    list.innerHTML = ""
+    dailyExpensesList.innerHTML = ""
+    dailyIncomesList.innerHTML = ""
+
+    setTimeout(getNewDatas, 1000)
+    inputDatas.style.display = "none"
+
+})
+
 
 const createNewUserDataBase = () => {
     if (userId) {
@@ -311,25 +345,25 @@ const getNewDatas = () => {
     });
 
     dailyExpensesRef.get().then(function (doc) {
-        if (doc.exists) {
-            dataBaseDailyExpenses = doc.data()
-            addData()
-            updateInputs()
-        } else {
-            console.log("No such document!");
-        }
+        // if (doc.exists) {
+        dataBaseDailyExpenses = doc.data()
+        addData()
+        updateInputs()
+        // } else {
+        //     console.log("No such document!");
+        // }
     }).catch(function (error) {
         console.log("Error getting document:", error);
     });
 
     dailyIncomesRef.get().then(function (doc) {
-        if (doc.exists) {
-            dataBaseDailyIncomes = doc.data()
-            addData()
-            updateInputs()
-        } else {
-            console.log("No such document!");
-        }
+        // if (doc.exists) {
+        dataBaseDailyIncomes = doc.data()
+        addData()
+        updateInputs()
+        // } else {
+        //     console.log("No such document!");
+        // }
     }).catch(function (error) {
         console.log("Error getting document:", error);
     });

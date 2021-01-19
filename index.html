@@ -12,6 +12,7 @@
 <body>
     <header>
         <button>SignIn</button>
+        <button>Monthly Reports</button>
     </header>
     <main>
         <section class="top">
@@ -30,6 +31,7 @@
                             id="displayRent">
                     </p>
                     <h3>Others bills:</h3>
+                    <div class="otherFixedExpenses"></div>
                 </div>
                 <h2>Daily Incomes</h2>
                 <div class="dailyIncomesList">
@@ -95,6 +97,13 @@
                     </article>
                     <input type="submit" value="Submit">
                 </form>
+            </div>
+            <div class="setDataAreas">
+                <select name="reporsList" id="reportsList">
+                    <option value=""></option>
+                </select>
+                <input id="submitReport" type="submit" value="Submit">
+
             </div>
         </section>
     </main>
