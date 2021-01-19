@@ -20,7 +20,7 @@ const closeWindow = document.querySelectorAll(".setDataAreas button")
 const reportInputs = document.querySelectorAll(".report input")
 const reportsList = document.querySelector("#reportsList")
 
-const month = (new Date).getMonth() + 3;
+const month = (new Date).getMonth() + 1;
 const year = (new Date).getFullYear()
 const date = `${month}-${year}`
 let dataBaseFixed;
@@ -85,7 +85,6 @@ const getJSON = () => {
 const getUser = () => {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-            console.log(user.uid);
             userId = user.uid
             headerButtons[0].innerHTML = "SignOut"
             updateRef()
@@ -100,7 +99,6 @@ const getUser = () => {
 
 const updateRef = () => {
     const user = userId ? userId : userIp
-    console.log(user);
     fixedRef = db.collection("users").doc(user).collection("Fixed Incomes-Expenses").doc(date);
     dailyExpensesRef = db.collection("users").doc(user).collection("Daily Expenses").doc(date);
     dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(date);
@@ -118,9 +116,6 @@ const updateRef = () => {
 }
 
 document.querySelector("#submitReport").addEventListener("click", () => {
-    buttons.forEach(button => button.style.display = "none")
-    console.log(reportsList.value);
-
     const user = userId ? userId : userIp
 
     fixedRef = db.collection("users").doc(user).collection("Fixed Incomes-Expenses").doc(reportsList.value);
@@ -129,6 +124,7 @@ document.querySelector("#submitReport").addEventListener("click", () => {
 
     savedInputs = ["savings", "rent", "others", "salary"]
     list.innerHTML = ""
+    moreList.innerHTML = ""
     dailyExpensesList.innerHTML = ""
     dailyIncomesList.innerHTML = ""
 
@@ -141,7 +137,6 @@ document.querySelector("#submitReport").addEventListener("click", () => {
 const createNewUserDataBase = () => {
     if (userId) {
         fixedRef.get().then(function (doc) {
-            console.log(doc.data());
             if (!doc.exists) {
                 fixedRef.set({
                     others: 0,
@@ -210,7 +205,6 @@ const addData = () => {
         chart.data.labels.push("Daily Expenses")
         values.push(dailyIE)
     }
-    console.log(values);
 
 
     budget = values.length ? total - values.reduce((a, b) => a + b) : total
@@ -218,9 +212,6 @@ const addData = () => {
     reportInputs[1].value = budget
     chart.data.labels.push("Left Over")
     values.push(budget)
-    console.log(budget);
-    console.log(values);
-
 
     values.forEach(value => {
         const percentage = value / total * 100;
@@ -251,7 +242,7 @@ addMore.addEventListener("click", (e) => {
             </article>`
 
         list.innerHTML += `
-            <p>${newDataInput.value}: £<input class="displayValues" type="number" readonly value="0" name="display${newDataInput.value}" id="display${newDataInput.value}"></p>`
+            <p><button value="${newDataInput.value}"><i class="fas fa-minus-circle"></i></button> ${newDataInput.value}: £<input class="displayValues" type="number" readonly value="0" name="display${newDataInput.value}" id="display${newDataInput.value}"></p>`
     }
 
     savedInputs.push(newDataInput.value)
@@ -265,18 +256,18 @@ addMore.addEventListener("click", (e) => {
 
 })
 
-let dailyPrinted = false;
-
 const updateInputs = () => {
     const dataLab = Object.keys(dataBaseFixed)
     const dataToAdd = []
-    dailyExpensesList.innerHTML = ''
+    dailyExpensesList.innerHTML = ""
     dailyIncomesList.innerHTML = ""
+    console.log(savedInputs);
+    // console.log(dataLab);
+
 
     dataLab.forEach(data => {
         if (!savedInputs.includes(data)) {
             dataToAdd.push(data)
-            console.log(data);
         }
     })
 
@@ -288,28 +279,44 @@ const updateInputs = () => {
     </article>`
 
         list.innerHTML += `
-        <p>${data}: £<input class="displayValues" type="number" readonly value="0" name="display${data}" id="display${data}"></p>`
+        <p><button value="${data}"><i class="fas fa-minus-circle"></i></button> ${data}: £<input class="displayValues" type="number" readonly value="0" name="display${data}" id="display${data}"></p>`
     })
     updateSavedInputs()
 
     if (dataBaseDailyExpenses) {
         for (let i = 0; i < Object.keys(dataBaseDailyExpenses).length; i++) {
             dailyExpensesList.innerHTML += `
-        <p class="dailyExpensesSelector"><button value="${Object.keys(dataBaseDailyExpenses)[i]}"><i class="fas fa-minus-circle"></i></button> ${Object.keys(dataBaseDailyExpenses)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDailyExpenses)[i]}" name="${Object.keys(dataBaseDailyExpenses)[i]}" id="display${Object.keys(dataBaseDailyExpenses)[i]}"></p>`
+        <p><button value="${Object.keys(dataBaseDailyExpenses)[i]}"><i class="fas fa-minus-circle"></i></button> ${Object.keys(dataBaseDailyExpenses)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDailyExpenses)[i]}" name="${Object.keys(dataBaseDailyExpenses)[i]}" id="display${Object.keys(dataBaseDailyExpenses)[i]}"></p>`
         }
     }
 
     if (dataBaseDailyIncomes) {
         for (let i = 0; i < Object.keys(dataBaseDailyIncomes).length; i++) {
             dailyIncomesList.innerHTML += `
-        <p class="dailyExpensesSelector"><button value="${Object.keys(dataBaseDailyIncomes)[i]}"><i class="fas fa-minus-circle"></i></button> ${Object.keys(dataBaseDailyIncomes)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDailyIncomes)[i]}" name="${Object.keys(dataBaseDailyIncomes)[i]}" id="display${Object.keys(dataBaseDailyIncomes)[i]}"></p>`
+        <p><button value="${Object.keys(dataBaseDailyIncomes)[i]}"><i class="fas fa-minus-circle"></i></button> ${Object.keys(dataBaseDailyIncomes)[i]}: £<input class="displayValues" type="number" readonly value="${Object.values(dataBaseDailyIncomes)[i]}" name="${Object.keys(dataBaseDailyIncomes)[i]}" id="display${Object.keys(dataBaseDailyIncomes)[i]}"></p>`
         }
     }
 }
 
+const updateSavedInputs = () => {
+    for (let i = 0; i < dataInputs.length; i++) {
+        savedInputs.push(dataInputs[i].name)
+    }
+}
 
 const deleteValue = (e, whichRef) => {
-    const reference = whichRef === "expenses" ? dailyExpensesRef : dailyIncomesRef
+    let reference;
+    if (whichRef === "expenses") { reference = dailyExpensesRef }
+    else if (whichRef === "incomes") { reference = dailyIncomesRef }
+    else {
+        reference = fixedRef
+        console.log(dataInputs[e.target.value]);
+        savedInputs = savedInputs.filter(input => input !== e.target.value)
+        console.log(savedInputs);
+    }
+
+    // reference === fixedRef ? savedInputs.splice(savedInputs.indexOf(e.target.value), 1) : console.log("nada");
+
 
     if (e.target.tagName === "BUTTON") {
         reference.update({
@@ -321,13 +328,7 @@ const deleteValue = (e, whichRef) => {
 
 dailyExpensesList.addEventListener("click", (e) => deleteValue(e, "expenses"))
 dailyIncomesList.addEventListener("click", (e) => deleteValue(e, "incomes"))
-
-
-const updateSavedInputs = () => {
-    for (let i = 0; i < dataInputs.length; i++) {
-        savedInputs.push(dataInputs[i].name)
-    }
-}
+list.addEventListener("click", (e) => deleteValue(e, "bills"))
 
 const getNewDatas = () => {
     fixedRef.get().then(function (doc) {
@@ -336,7 +337,6 @@ const getNewDatas = () => {
             addData()
             updateInputs()
             updateValues(doc.data())
-            console.log(dataBaseFixed);
         } else {
             console.log("No such document!");
         }
