@@ -26,6 +26,7 @@ let dataBaseFixed;
 let dataBaseDailyExpenses;
 let dataBaseDailyIncomes;
 let userId;
+let userIp;
 let fixedRef;
 let dailyExpensesRef;
 let dailyIncomesRef;
@@ -61,8 +62,19 @@ const signOut = () => {
 
 signInButton.onclick = () => signInButton.innerHTML === "SignIn" ? signIn() : signOut()
 
-
-
+const getJSON = () => {
+    const url = `https://api.astroip.co/2.99.115.173?api_key=a45dc99e-f914-4961-8009-54fca96d8819`
+    const proxyUrl = `https://agile-island-79839.herokuapp.com/`
+    fetch(proxyUrl + url)
+        .then((res) => res.json())
+        .then((res) => {
+            userIp = res.requester_ip
+        })
+        .then(() => updateRef())
+        .catch((err) => {
+            console.log(err);
+        });
+};
 
 const getUser = () => {
     firebase.auth().onAuthStateChanged((user) => {
@@ -74,13 +86,18 @@ const getUser = () => {
         } else {
             userId = undefined
             signInButton.innerHTML = "SignIn"
+            console.log("done");
+            getJSON()
         }
     });
 };
 
 const updateRef = () => {
-    fixedRef = db.collection("users").doc(userId).collection("Fixed Incomes-Expenses").doc(date); dailyExpensesRef = db.collection("users").doc(userId).collection("Daily Expenses").doc(date);
-    dailyIncomesRef = db.collection("users").doc(userId).collection("Daily Incomes").doc(date);
+    const user = userId ? userId : userIp
+    console.log(user);
+    fixedRef = db.collection("users").doc(user).collection("Fixed Incomes-Expenses").doc(date);
+    dailyExpensesRef = db.collection("users").doc(user).collection("Daily Expenses").doc(date);
+    dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(date);
     createNewUserDataBase()
     getNewDatas()
     updateSavedInputs()
@@ -350,7 +367,6 @@ class FixedIncomes {
     }
 
     addToDatabase(value, name) {
-        // name = name.includes("/") ? name.replace("/", "-") : name
         fixedRef.get().then(function (doc) {
             if (doc.exists) {
                 fixedRef.update({
