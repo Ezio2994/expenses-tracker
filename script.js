@@ -19,8 +19,9 @@ const dailyIncomesList = document.querySelector(".dailyIncomesList")
 const closeWindow = document.querySelectorAll(".setDataAreas button")
 const reportInputs = document.querySelectorAll(".report input")
 const reportsList = document.querySelector("#reportsList")
+const reports = document.querySelectorAll(".reports tr")
 
-const month = (new Date).getMonth() + 4;
+const month = (new Date).getMonth() + 1;
 const year = (new Date).getFullYear()
 const date = `${month}-${year}`
 let dataBaseFixed;
@@ -31,6 +32,7 @@ let userIp;
 let fixedRef;
 let dailyExpensesRef;
 let dailyIncomesRef;
+let reportsRef;
 
 
 var firebaseConfig = {
@@ -97,21 +99,36 @@ const getUser = () => {
     });
 };
 
-
 const updateRef = () => {
     const user = userId ? userId : userIp
     fixedRef = db.collection("users").doc(user).collection("Fixed Incomes-Expenses").doc(date);
     dailyExpensesRef = db.collection("users").doc(user).collection("Daily Expenses").doc(date);
     dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(date);
+    reportsRef = db.collection("users").doc(user).collection("reports").doc(date);
     createNewUserDataBase()
     getNewDatas()
 
-    db.collection("users").doc(user).collection("Fixed Incomes-Expenses").get().then((querySnapshot) => {
+    const incomes = [];
+    const expenses = [];
+    const saved = [];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+    db.collection("users").doc(user).collection("reports").get().then((querySnapshot) => {
         querySnapshot.docs.map((doc) => {
             reportsList.innerHTML += `<option value="${doc.id}">${doc.id}</option>`
+            incomes.push(doc.data().totalIncomes);
+            expenses.push(doc.data().totalSpent);
+            saved.push(doc.data().moneySaved);
+            reports[0].innerHTML += `<th>${months[doc.id.charAt(0) - 1]}</th>`
+            reports[1].innerHTML += `<td>£${doc.data().totalIncomes}</td>`
+            reports[2].innerHTML += `<td>£${doc.data().totalSpent}</td>`
+            reports[3].innerHTML += `<td>£${doc.data().moneySaved}</td>`
         })
+
+        document.querySelector("#reportSum").innerHTML = `
+        Total this year: Incomes: ${incomes.reduce((a, b) => a + b)} - Expenses: ${expenses.reduce((a, b) => a + b)} - Saved: ${saved.reduce((a, b) => a + b)}`
     })
+
 }
 
 document.querySelector("#submitReport").addEventListener("click", () => {
@@ -158,7 +175,6 @@ const importFidex = () => {
             ...previusData
         })
     })
-
 }
 
 const getNewDatas = () => {
@@ -250,8 +266,9 @@ const addData = () => {
         values.push(dailyIE)
     }
 
+    totalSpent = values.length ? values.reduce((a, b) => a + b) : 0
 
-    budget = values.length ? total - values.reduce((a, b) => a + b) : total
+    budget = total - totalSpent
     reportInputs[0].value = dataBaseFixed.savings + budget
     reportInputs[1].value = budget
     chart.data.labels.push("Left Over")
@@ -260,6 +277,22 @@ const addData = () => {
     values.forEach(value => {
         const percentage = value / total * 100;
         chart.data.datasets[0].data.push(Math.round(percentage))
+    })
+
+    reportsRef.get().then(function (doc) {
+        if (!doc.exists) {
+            reportsRef.set({
+                totalIncomes: total,
+                moneySaved: dataBaseFixed.savings + budget,
+                totalSpent: totalSpent - dataBaseFixed.savings
+            })
+        } else {
+            reportsRef.update({
+                totalIncomes: total,
+                moneySaved: dataBaseFixed.savings + budget,
+                totalSpent: totalSpent - dataBaseFixed.savings
+            })
+        }
     })
 
 

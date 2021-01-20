@@ -69,7 +69,7 @@
     }
 
     .setDataAreas {
-        width: 400px;
+        width: 600px;
         min-height: 300px;
         height: fit-content;
         background-color: bisque;
@@ -83,6 +83,13 @@
         input[type=number] {
             width: 100px;
             height: 30px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            width: fit-content;
+            padding: 10px;
+            text-align: center;
         }
 
         #addNewDailyInputs {
