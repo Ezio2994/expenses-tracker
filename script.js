@@ -61,7 +61,7 @@ const signOut = () => {
     });
 }
 
-headerButtons[0].onclick = () => headerButtons.innerHTML === "SignIn" ? signIn() : signOut()
+headerButtons[0].onclick = () => headerButtons[0].innerHTML === "SignIn" ? signIn() : signOut()
 headerButtons[1].onclick = () => {
     inputDatas.style.display = "block"
     dataAreas.forEach(dataAreas => dataAreas.style.display = "none")
@@ -86,6 +86,7 @@ const getUser = () => {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             userId = user.uid
+            console.log(userId);
             headerButtons[0].innerHTML = "SignOut"
             updateRef()
         } else {
@@ -104,7 +105,7 @@ const updateRef = () => {
     dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(date);
     createNewUserDataBase()
     getNewDatas()
-    updateSavedInputs()
+    // updateSavedInputs()
 
 
     db.collection("users").doc(user).collection("Fixed Incomes-Expenses").get().then((querySnapshot) => {
@@ -223,7 +224,6 @@ const addData = () => {
 
 }
 
-let savedInputs = [];
 let toSave = [];
 
 addMore.addEventListener("click", (e) => {
@@ -240,12 +240,7 @@ addMore.addEventListener("click", (e) => {
                 <label class="dataLabels" for="${newDataInput.value}">${newDataInput.value}:</label>
                 <input class="dataInputs" type="number" min="1" step="any" id="${newDataInput.value}" name="${newDataInput.value}">
             </article>`
-
-        list.innerHTML += `
-            <p><button value="${newDataInput.value}"><i class="fas fa-minus-circle"></i></button> ${newDataInput.value}: £<input class="displayValues" type="number" readonly value="0" name="display${newDataInput.value}" id="display${newDataInput.value}"></p>`
     }
-
-    savedInputs.push(newDataInput.value)
     newDataInput.value = ""
 
     for (let i = 0; i < dataInputs.length; i++) {
@@ -259,11 +254,11 @@ addMore.addEventListener("click", (e) => {
 const updateInputs = () => {
     const dataLab = Object.keys(dataBaseFixed)
     const dataToAdd = []
+    const savedInputs = ["rent", "savings", "others", "salary"];
+    list.innerHTML = ""
+    moreList.innerHTML = ""
     dailyExpensesList.innerHTML = ""
     dailyIncomesList.innerHTML = ""
-    console.log(savedInputs);
-    // console.log(dataLab);
-
 
     dataLab.forEach(data => {
         if (!savedInputs.includes(data)) {
@@ -281,7 +276,6 @@ const updateInputs = () => {
         list.innerHTML += `
         <p><button value="${data}"><i class="fas fa-minus-circle"></i></button> ${data}: £<input class="displayValues" type="number" readonly value="0" name="display${data}" id="display${data}"></p>`
     })
-    updateSavedInputs()
 
     if (dataBaseDailyExpenses) {
         for (let i = 0; i < Object.keys(dataBaseDailyExpenses).length; i++) {
@@ -298,25 +292,12 @@ const updateInputs = () => {
     }
 }
 
-const updateSavedInputs = () => {
-    for (let i = 0; i < dataInputs.length; i++) {
-        savedInputs.push(dataInputs[i].name)
-    }
-}
 
 const deleteValue = (e, whichRef) => {
     let reference;
     if (whichRef === "expenses") { reference = dailyExpensesRef }
     else if (whichRef === "incomes") { reference = dailyIncomesRef }
-    else {
-        reference = fixedRef
-        console.log(dataInputs[e.target.value]);
-        savedInputs = savedInputs.filter(input => input !== e.target.value)
-        console.log(savedInputs);
-    }
-
-    // reference === fixedRef ? savedInputs.splice(savedInputs.indexOf(e.target.value), 1) : console.log("nada");
-
+    else { reference = fixedRef }
 
     if (e.target.tagName === "BUTTON") {
         reference.update({
@@ -334,46 +315,35 @@ const getNewDatas = () => {
     fixedRef.get().then(function (doc) {
         if (doc.exists) {
             dataBaseFixed = doc.data()
-            addData()
-            updateInputs()
-            updateValues(doc.data())
         } else {
             console.log("No such document!");
         }
     }).catch(function (error) {
         console.log("Error getting document:", error);
-    });
+    })
 
     dailyExpensesRef.get().then(function (doc) {
-        // if (doc.exists) {
         dataBaseDailyExpenses = doc.data()
-        addData()
-        updateInputs()
-        // } else {
-        //     console.log("No such document!");
-        // }
     }).catch(function (error) {
         console.log("Error getting document:", error);
-    });
+    })
 
     dailyIncomesRef.get().then(function (doc) {
-        // if (doc.exists) {
         dataBaseDailyIncomes = doc.data()
-        addData()
-        updateInputs()
-        // } else {
-        //     console.log("No such document!");
-        // }
     }).catch(function (error) {
         console.log("Error getting document:", error);
-    });
-
+    })
+        .then(() => {
+            addData()
+            updateInputs()
+            updateValues()
+        })
 
 }
 
-const updateValues = (data) => {
-    const dataLab = Object.keys(data)
-    const dataValue = Object.values(data)
+const updateValues = () => {
+    const dataLab = Object.keys(dataBaseFixed)
+    const dataValue = Object.values(dataBaseFixed)
 
     let i = 0;
     let x = 0;
