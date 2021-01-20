@@ -20,7 +20,7 @@ const closeWindow = document.querySelectorAll(".setDataAreas button")
 const reportInputs = document.querySelectorAll(".report input")
 const reportsList = document.querySelector("#reportsList")
 
-const month = (new Date).getMonth() + 1;
+const month = (new Date).getMonth() + 4;
 const year = (new Date).getFullYear()
 const date = `${month}-${year}`
 let dataBaseFixed;
@@ -105,8 +105,6 @@ const updateRef = () => {
     dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(date);
     createNewUserDataBase()
     getNewDatas()
-    // updateSavedInputs()
-
 
     db.collection("users").doc(user).collection("Fixed Incomes-Expenses").get().then((querySnapshot) => {
 
@@ -144,12 +142,57 @@ const createNewUserDataBase = () => {
                     rent: 0,
                     salary: 0,
                     savings: 0
-                })
+                }).then(() => importFidex())
             }
         }).catch(function (error) {
             console.log("Error getting document:", error);
         });
     }
+}
+
+const importFidex = () => {
+    db.collection("users").doc(userId).collection("Fixed Incomes-Expenses").doc(`${month - 1}-${year}`).get().then((doc) => {
+        previusData = doc.data()
+
+        fixedRef.update({
+            ...previusData
+        })
+    })
+
+}
+
+const getNewDatas = () => {
+    fixedRef.get().then(function (doc) {
+        if (doc.exists) {
+            dataBaseFixed = doc.data()
+            addData()
+            updateInputs()
+            updateValues()
+        } else {
+            console.log("No such document!");
+            setTimeout(getNewDatas, 1000)
+        }
+    }).catch(function (error) {
+        console.log("Error getting document:", error);
+    })
+
+    dailyExpensesRef.get().then(function (doc) {
+        dataBaseDailyExpenses = doc.data()
+        addData()
+        updateInputs()
+        updateValues()
+    }).catch(function (error) {
+        console.log("Error getting document:", error);
+    })
+
+    dailyIncomesRef.get().then(function (doc) {
+        dataBaseDailyIncomes = doc.data()
+        addData()
+        updateInputs()
+        updateValues()
+    }).catch(function (error) {
+        console.log("Error getting document:", error);
+    })
 }
 
 const chart = new Chart(ctx, {
@@ -173,7 +216,7 @@ const addData = () => {
     chart.data.datasets[0].data = []
     const dataLab = dataBaseFixed ? Object.keys(dataBaseFixed) : null
     const dataValue = dataBaseFixed ? Object.values(dataBaseFixed) : null
-    let total = dataBaseFixed.others ? dataBaseFixed.salary + dataBaseFixed.others : dataBaseFixed.salary;
+    let total = dataBaseFixed ? dataBaseFixed.salary + dataBaseFixed.others : dataBaseFixed.salary;
     const moreIncomes = dataBaseDailyIncomes !== undefined && Object.values(dataBaseDailyIncomes).length ? Object.values(dataBaseDailyIncomes).reduce((a, b) => a + b) : 0
     let labels = [];
     let values = [];
@@ -311,35 +354,7 @@ dailyExpensesList.addEventListener("click", (e) => deleteValue(e, "expenses"))
 dailyIncomesList.addEventListener("click", (e) => deleteValue(e, "incomes"))
 list.addEventListener("click", (e) => deleteValue(e, "bills"))
 
-const getNewDatas = () => {
-    fixedRef.get().then(function (doc) {
-        if (doc.exists) {
-            dataBaseFixed = doc.data()
-        } else {
-            console.log("No such document!");
-        }
-    }).catch(function (error) {
-        console.log("Error getting document:", error);
-    })
 
-    dailyExpensesRef.get().then(function (doc) {
-        dataBaseDailyExpenses = doc.data()
-    }).catch(function (error) {
-        console.log("Error getting document:", error);
-    })
-
-    dailyIncomesRef.get().then(function (doc) {
-        dataBaseDailyIncomes = doc.data()
-    }).catch(function (error) {
-        console.log("Error getting document:", error);
-    })
-        .then(() => {
-            addData()
-            updateInputs()
-            updateValues()
-        })
-
-}
 
 const updateValues = () => {
     const dataLab = Object.keys(dataBaseFixed)
@@ -418,8 +433,6 @@ addNewDailyInputs[2].addEventListener("click", (e) => {
     const isObject = isExpensesObj ? Object.keys(isExpensesObj) : "null"
     const isExpenses = addNewDailyHeader.innerHTML === "Add Daily Expenses" ? dailyExpensesRef : dailyIncomesRef
     const isExpensesRef = addNewDailyHeader.innerHTML === "Add Daily Expenses" ? dailyExpensesRef : dailyIncomesRef
-
-
 
     if (isObject.includes(addNewDailyInputs[0].value)) {
         isExpensesRef.update({
