@@ -127,7 +127,7 @@ const updateRef = () => {
 
         document.querySelector("#reportSum").innerHTML = `
         Total this year: Incomes: ${incomes.reduce((a, b) => a + b)} - Expenses: ${expenses.reduce((a, b) => a + b)} - Saved: ${saved.reduce((a, b) => a + b)}`
-    })
+    }).catch((error) => null)
 
 }
 
@@ -151,24 +151,26 @@ document.querySelector("#submitReport").addEventListener("click", () => {
 
 
 const createNewUserDataBase = () => {
-    if (userId) {
-        fixedRef.get().then(function (doc) {
-            if (!doc.exists) {
-                fixedRef.set({
-                    others: 0,
-                    rent: 0,
-                    salary: 0,
-                    savings: 0
-                }).then(() => importFidex())
-            }
-        }).catch(function (error) {
-            console.log("Error getting document:", error);
-        });
-    }
+    // if (userId) {
+    fixedRef.get().then(function (doc) {
+        if (!doc.exists) {
+            fixedRef.set({
+                others: 0,
+                rent: 0,
+                salary: 0,
+                savings: 0
+            }).then(() => importPrevFixed())
+        }
+    }).catch(function (error) {
+        console.log("Error getting document:", error);
+    });
+    // }
 }
 
-const importFidex = () => {
-    db.collection("users").doc(userId).collection("Fixed Incomes-Expenses").doc(`${month - 1}-${year}`).get().then((doc) => {
+const importPrevFixed = () => {
+    const user = userId ? userId : userIp
+
+    db.collection("users").doc(user).collection("Fixed Incomes-Expenses").doc(`${month - 1}-${year}`).get().then((doc) => {
         previusData = doc.data()
 
         fixedRef.update({

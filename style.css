@@ -5,23 +5,50 @@
           box-sizing: border-box;
 }
 
+nav {
+  min-height: 10vh;
+  width: 100%;
+  background-color: lightblue;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding: 10px;
+}
+
+nav button {
+  height: 30px;
+  padding: 5px;
+}
+
 .top {
+  min-height: 80vh;
   width: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
+  -ms-flex-wrap: wrap-reverse;
+      flex-wrap: wrap-reverse;
   -webkit-box-pack: space-evenly;
       -ms-flex-pack: space-evenly;
           justify-content: space-evenly;
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
+  background-color: beige;
 }
 
 .top input {
   border: none;
+  background-color: transparent;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
 }
 
 .top button {
@@ -33,22 +60,31 @@
   pointer-events: none;
 }
 
-.top button .resume {
+.top .resume {
   min-width: 300px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
 }
 
-.top button div {
-  width: 100%;
+.top .resume div {
+  width: 300px;
 }
 
-.top button div input {
+.top .resume div input {
   border: none;
+  width: 60px;
 }
 
 .top .chart {
   height: auto;
   width: 600px;
   text-align: center;
+  margin-bottom: 30px;
 }
 
 .top .chart h2 {
@@ -132,12 +168,50 @@
 }
 
 footer {
-  margin-top: 100px;
+  width: 100%;
+  min-height: 10vh;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-pack: space-evenly;
       -ms-flex-pack: space-evenly;
           justify-content: space-evenly;
+  background-color: lightblue;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+footer button {
+  height: 30px;
+  padding: 5px;
+}
+
+@media only screen and (max-width: 1000px) {
+  .top .resume {
+    width: 100%;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    -webkit-box-pack: space-evenly;
+        -ms-flex-pack: space-evenly;
+            justify-content: space-evenly;
+    row-gap: 20px;
+    margin-bottom: 20px;
+  }
+  .top .chart {
+    width: 100%;
+    margin: 30px auto;
+  }
+  .top .chart canvas {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .inputData .setDataAreas {
+    width: 100%;
+  }
 }
 /*# sourceMappingURL=style.css.map */
