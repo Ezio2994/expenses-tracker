@@ -5,8 +5,12 @@
           box-sizing: border-box;
 }
 
+* button:focus, * input:focus {
+  outline: none;
+}
+
 nav {
-  min-height: 10vh;
+  height: 10vh;
   width: 100%;
   background-color: lightblue;
   display: -webkit-box;
@@ -21,13 +25,48 @@ nav {
   padding: 10px;
 }
 
-nav button {
-  height: 30px;
-  padding: 5px;
+nav article {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: reverse;
+      -ms-flex-direction: row-reverse;
+          flex-direction: row-reverse;
 }
 
-.top {
+nav article button {
+  margin: 20px;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  font-size: 42px;
+}
+
+nav article button img {
+  height: 100%;
+  width: 100%;
+}
+
+main {
+  background-color: beige;
   min-height: 80vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+main .top {
+  min-height: 70vh;
   width: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -43,7 +82,7 @@ nav button {
   background-color: beige;
 }
 
-.top input {
+main .top input {
   border: none;
   background-color: transparent;
   width: -webkit-fit-content;
@@ -51,17 +90,19 @@ nav button {
   width: fit-content;
 }
 
-.top button {
+main .top button {
   border: none;
   cursor: pointer;
 }
 
-.top button svg {
+main .top button svg {
   pointer-events: none;
 }
 
-.top .resume {
-  min-width: 300px;
+main .top .resume {
+  min-width: 400px;
+  max-height: 70vh;
+  overflow: auto;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -71,27 +112,27 @@ nav button {
           flex-direction: column;
 }
 
-.top .resume div {
+main .top .resume div {
   width: 300px;
 }
 
-.top .resume div input {
+main .top .resume div input {
   border: none;
   width: 60px;
 }
 
-.top .chart {
+main .top .chart {
   height: auto;
   width: 600px;
   text-align: center;
   margin-bottom: 30px;
 }
 
-.top .chart h2 {
+main .top .chart h2 {
   margin: 20px 0;
 }
 
-.inputData {
+main .inputData {
   display: none;
   position: absolute;
   top: 0;
@@ -100,7 +141,7 @@ nav button {
   background: rgba(0, 0, 0, 0.3);
 }
 
-.inputData button {
+main .inputData button {
   border: none;
   background-color: transparent;
   -ms-flex-item-align: end;
@@ -109,18 +150,19 @@ nav button {
   margin-right: 10px;
 }
 
-.inputData button svg {
+main .inputData button svg {
   font-size: 28px;
 }
 
-.inputData .setDataAreas {
+main .inputData .setDataAreas {
   width: 600px;
   min-height: 300px;
   height: -webkit-fit-content;
   height: -moz-fit-content;
   height: fit-content;
-  background-color: bisque;
-  border: 2px solid black;
+  background-color: beige;
+  border: 5px solid lightblue;
+  font-weight: bold;
   margin: 10% auto;
   display: none;
   -webkit-box-orient: vertical;
@@ -135,12 +177,44 @@ nav button {
           align-items: center;
 }
 
-.inputData .setDataAreas input[type=number] {
-  width: 100px;
+main .inputData .setDataAreas input[type=submit] {
+  margin-bottom: 20px;
+  border: none;
+  padding: 5px;
+  background-color: lightblue;
+  border-radius: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+main .inputData .setDataAreas h2 {
+  margin: 10px 0;
+}
+
+main .inputData .setDataAreas .otherFixed {
+  text-align: center;
+  width: 100%;
+}
+
+main .inputData .setDataAreas article {
+  padding: 5px;
+}
+
+main .inputData .setDataAreas article input[type=number] {
+  width: 70px;
+  height: 20px;
+}
+
+main .inputData .setDataAreas form {
+  margin: 30px 0 15px;
+}
+
+main .inputData .setDataAreas form input[type=text] {
   height: 30px;
 }
 
-.inputData .setDataAreas th, .inputData .setDataAreas td {
+main .inputData .setDataAreas th, main .inputData .setDataAreas td {
   border: 1px solid black;
   width: -webkit-fit-content;
   width: -moz-fit-content;
@@ -149,7 +223,14 @@ nav button {
   text-align: center;
 }
 
-.inputData .setDataAreas #addNewDailyInputs {
+main .inputData .setDataAreas select {
+  width: 200px;
+  height: 40px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+main .inputData .setDataAreas #addNewDailyInputs {
   width: 100%;
   height: 300px;
   display: -webkit-box;
@@ -169,7 +250,7 @@ nav button {
 
 footer {
   width: 100%;
-  min-height: 10vh;
+  height: 10vh;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -183,8 +264,12 @@ footer {
 }
 
 footer button {
-  height: 30px;
-  padding: 5px;
+  padding: 10px;
+  border: none;
+  border-radius: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 @media only screen and (max-width: 1000px) {

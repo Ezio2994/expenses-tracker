@@ -1,4 +1,5 @@
 const headerButtons = document.querySelectorAll("header button")
+const showMonth = document.querySelector("main h2")
 const ctx = document.getElementById('myChart').getContext('2d');
 const displayDatas = document.getElementsByClassName("displayValues")
 const buttons = document.querySelectorAll("footer button")
@@ -21,8 +22,9 @@ const reportInputs = document.querySelectorAll(".report input")
 const reportsList = document.querySelector("#reportsList")
 const reports = document.querySelectorAll(".reports tr")
 
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const month = (new Date).getMonth() + 1;
-const year = (new Date).getFullYear()
+const year = (new Date).getFullYear();
 const date = `${month}-${year}`
 let dataBaseFixed;
 let dataBaseDailyExpenses;
@@ -50,6 +52,8 @@ var db = firebase.firestore();
 
 var provider = new firebase.auth.GoogleAuthProvider();
 
+showMonth.innerHTML = `${months[month - 1]} - ${year}`
+
 const signIn = () => {
     firebase.auth().signInWithRedirect(provider);
     getUser()
@@ -63,7 +67,7 @@ const signOut = () => {
     });
 }
 
-headerButtons[0].onclick = () => headerButtons[0].innerHTML === "SignIn" ? signIn() : signOut()
+headerButtons[0].onclick = () => headerButtons[0].value === "signIn" ? signIn() : signOut()
 headerButtons[1].onclick = () => {
     inputDatas.style.display = "block"
     dataAreas.forEach(dataAreas => dataAreas.style.display = "none")
@@ -89,15 +93,19 @@ const getUser = () => {
         if (user) {
             userId = user.uid
             console.log(userId);
-            headerButtons[0].innerHTML = "SignOut"
+            headerButtons[0].innerHTML = `<i class="fas fa-sign-out-alt"></i>`
+            headerButtons[0].value = "signOut"
             updateRef()
         } else {
             userId = undefined
-            headerButtons[0].innerHTML = "SignIn"
+            headerButtons[0].innerHTML = `<img src="./btn_google_signin_dark_focus_web.png" alt="">`
+            headerButtons[0].value = "signIn"
             getJSON()
         }
     });
 };
+
+
 
 const updateRef = () => {
     const user = userId ? userId : userIp
@@ -107,28 +115,27 @@ const updateRef = () => {
     reportsRef = db.collection("users").doc(user).collection("reports").doc(date);
     createNewUserDataBase()
     getNewDatas()
-
     const incomes = [];
     const expenses = [];
     const saved = [];
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    db.collection("users").doc(user).collection("reports").get().then((querySnapshot) => {
-        querySnapshot.docs.map((doc) => {
-            reportsList.innerHTML += `<option value="${doc.id}">${doc.id}</option>`
-            incomes.push(doc.data().totalIncomes);
-            expenses.push(doc.data().totalSpent);
-            saved.push(doc.data().moneySaved);
-            reports[0].innerHTML += `<th>${months[doc.id.charAt(0) - 1]}</th>`
-            reports[1].innerHTML += `<td>£${doc.data().totalIncomes}</td>`
-            reports[2].innerHTML += `<td>£${doc.data().totalSpent}</td>`
-            reports[3].innerHTML += `<td>£${doc.data().moneySaved}</td>`
-        })
 
-        document.querySelector("#reportSum").innerHTML = `
-        Total this year: Incomes: ${incomes.reduce((a, b) => a + b)} - Expenses: ${expenses.reduce((a, b) => a + b)} - Saved: ${saved.reduce((a, b) => a + b)}`
-    }).catch((error) => null)
+    db.collection("users").doc(user).collection("reports").orderBy("id")
+        .get().then((querySnapshot) => {
+            querySnapshot.docs.map((doc) => {
+                reportsList.innerHTML += `<option value="${doc.id}">${doc.id}</option>`
+                incomes.push(doc.data().totalIncomes);
+                expenses.push(doc.data().totalSpent);
+                saved.push(doc.data().moneySaved);
+                reports[0].innerHTML += `<th>${months[doc.id.charAt(1) !== "-" ? doc.id.slice(0, 2) - 1 : doc.id.charAt(0) - 1]}</th>`
+                reports[1].innerHTML += `<td>£${doc.data().totalIncomes}</td>`
+                reports[2].innerHTML += `<td>£${doc.data().totalSpent}</td>`
+                reports[3].innerHTML += `<td>£${doc.data().moneySaved}</td>`
+            })
 
+            document.querySelector("#reportSum").innerHTML = `
+        Total this year: Incomes: £${incomes.reduce((a, b) => a + b)} - Expenses: £${expenses.reduce((a, b) => a + b)} - Saved: £${saved.reduce((a, b) => a + b)}`
+        }).catch((error) => null)
 }
 
 document.querySelector("#submitReport").addEventListener("click", () => {
@@ -138,6 +145,7 @@ document.querySelector("#submitReport").addEventListener("click", () => {
     dailyExpensesRef = db.collection("users").doc(user).collection("Daily Expenses").doc(reportsList.value);
     dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(reportsList.value);
 
+    showMonth.innerHTML = `${months[reportsList.value.charAt(1) !== "-" ? reportsList.value.slice(0, 2) - 1 : reportsList.value.charAt(0) - 1]} - ${year}`
     savedInputs = ["savings", "rent", "others", "salary"]
     list.innerHTML = ""
     moreList.innerHTML = ""
@@ -281,15 +289,19 @@ const addData = () => {
         chart.data.datasets[0].data.push(Math.round(percentage))
     })
 
+    const monthForId = month < 10 ? `0${month}` : month
+
     reportsRef.get().then(function (doc) {
         if (!doc.exists) {
             reportsRef.set({
+                id: Number(year.toString() + "." + monthForId.toString()),
                 totalIncomes: total,
                 moneySaved: dataBaseFixed.savings + budget,
                 totalSpent: totalSpent - dataBaseFixed.savings
             })
         } else {
             reportsRef.update({
+                id: Number(year.toString() + "." + monthForId.toString()),
                 totalIncomes: total,
                 moneySaved: dataBaseFixed.savings + budget,
                 totalSpent: totalSpent - dataBaseFixed.savings

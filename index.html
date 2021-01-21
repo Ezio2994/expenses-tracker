@@ -14,12 +14,13 @@
         <nav>
             <h1>Expenses Tracker</h1>
             <article>
-                <button>SignIn</button>
-                <button>Monthly Reports</button>
+                <button value="signIn"><img src="./btn_google_signin_dark_focus_web.png" alt=""></button>
+                <button><i class="far fa-clipboard"></i></button>
             </article>
         </nav>
     </header>
     <main>
+        <h2></h2>
         <section class="top">
             <section class="resume">
                 <div class="incomes">
@@ -64,6 +65,7 @@
         <section class="inputData">
             <div class="setDataAreas">
                 <button><i class="far fa-times-circle"></i></button>
+                <h2>Fixed Incomes/Expenses & Savings</h2>
                 <article>
                     <label class="dataLabels" for="salary">Salary:</label>
                     <input class="dataInputs" type="number" min="1" step="any" id="salary" name="salary">
@@ -86,7 +88,8 @@
 
                     </div>
                     <form class="newData">
-                        <input type="text" name="newData" id="newData" required>
+                        <input type="text" name="newData" id="newData" placeholder="Add more fixed monthly expenses"
+                            required>
                         <input id="submit" type="submit" value="Add">
                     </form>
                 </div>
@@ -124,8 +127,8 @@
                     </tr>
                 </table>
                 <article id="reportSum"></article>
-                <select name="reporsList" id="reportsList">
-                    <option value=""></option>
+                <select name="reporsList" id="reportsList" required>
+                    <option value="">Month to view</option>
                 </select>
                 <input id="submitReport" type="submit" value="Submit">
 

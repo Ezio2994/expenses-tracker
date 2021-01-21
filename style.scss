@@ -2,10 +2,16 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+
+    button, input {
+        &:focus{
+            outline: none;
+        }
+    }
 }
 
 nav {
-    min-height: 10vh;
+    height: 10vh;
     width: 100%;
     background-color: lightblue;
     display: flex;
@@ -13,135 +19,201 @@ nav {
     justify-content: space-between;
     padding: 10px;
 
-    button {
-        height: 30px;
-        padding: 5px;
+    article {
+        display: flex;
+        flex-direction: row-reverse;
+
+        button {
+            margin: 20px;
+            border: none;
+            cursor: pointer;
+            background-color: transparent;
+            font-size: 42px;
+
+            img {
+                height: 100%;
+                width: 100%;
+            }
+        }
     }
 }
 
-.top {
-    min-height: 80vh;
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap-reverse;
-    justify-content: space-evenly;
-    align-items: center;
+main { 
     background-color: beige;
-
-    input {
-        border: none;
-        background-color: transparent;
-        width: fit-content;
-    }
-
-    button {
-        border: none;
-        cursor: pointer;
-
-        svg {
-            pointer-events: none;
-        }
-    }
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
 
 
-    .resume {
-        min-width: 300px;
+    .top {
+        min-height: 70vh;
+        width: 100%;
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap-reverse;
+        justify-content: space-evenly;
+        align-items: center;
+        background-color: beige;
 
-        div {
-            width: 300px;
+        input {
+            border: none;
+            background-color: transparent;
+            width: fit-content;
+        }
 
-            input {
-                border: none;
-                width: 60px;
+        button {
+            border: none;
+            cursor: pointer;
+
+            svg {
+                pointer-events: none;
+            }
+        }
+
+
+        .resume {
+            min-width: 400px;
+            max-height: 70vh;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+
+            div {
+                width: 300px;
+
+                input {
+                    border: none;
+                    width: 60px;
+                }
+            }
+        }
+
+        .chart {
+            height: auto;
+            width: 600px;
+            text-align: center;
+            margin-bottom: 30px;
+
+            h2 {
+                margin: 20px 0;
             }
         }
     }
 
 
-
-    .chart {
-        height: auto;
-        width: 600px;
-        text-align: center;
-        margin-bottom: 30px;
-
-        h2 {
-            margin: 20px 0;
-        }
-    }
-}
-
-
-.inputData {
-    display: none;
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100vh;
-    background: rgba($color: #000000, $alpha: .3);
-
-    button {
-        border: none;
-        background-color: transparent;
-        align-self: flex-end;
-        cursor: pointer;
-        margin-right: 10px;
-
-        svg {
-            font-size: 28px;
-        }
-    }
-
-    .setDataAreas {
-        width: 600px;
-        min-height: 300px;
-        height: fit-content;
-        background-color: bisque;
-        border: 2px solid black;
-        margin: 10% auto;
+    .inputData {
         display: none;
-        flex-direction: column;
-        justify-content: space-evenly;
-        align-items: center;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba($color: #000000, $alpha: .3);
 
-        input[type=number] {
-            width: 100px;
-            height: 30px;
+        button {
+            border: none;
+            background-color: transparent;
+            align-self: flex-end;
+            cursor: pointer;
+            margin-right: 10px;
+
+            svg {
+                font-size: 28px;
+            }
         }
 
-        th, td {
-            border: 1px solid black;
-            width: fit-content;
-            padding: 10px;
-            text-align: center;
-        }
-
-        #addNewDailyInputs {
-            width: 100%;
-            height: 300px;
-            display: flex;
+        .setDataAreas {
+            width: 600px;
+            min-height: 300px;
+            height: fit-content;
+            background-color: beige;
+            border: 5px solid lightblue;
+            font-weight: bold;
+            margin: 10% auto;
+            display: none;
             flex-direction: column;
-            align-items: center;
             justify-content: space-evenly;
+            align-items: center;
+
+            input[type=submit] {
+                margin-bottom: 20px;
+                border: none;
+                padding: 5px;
+                background-color: lightblue;
+                border-radius: 25px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            h2 {
+                margin: 10px 0;
+            }
+
+            .otherFixed {
+                text-align: center;
+                width: 100%;
+
+            }
+
+            article {
+                padding: 5px;
+
+                input[type=number] {
+                    width: 70px;
+                    height: 20px;
+                }
+            }
+
+            form {
+                margin: 30px 0 15px;
+
+                input[type=text] {
+                    height: 30px;
+                }
+            }
+
+            th, td {
+                border: 1px solid black;
+                width: fit-content;
+                padding: 10px;
+                text-align: center;
+            }
+
+            select {
+                width: 200px;
+                height: 40px;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            #addNewDailyInputs {
+                width: 100%;
+                height: 300px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-evenly;
+            }
         }
-
     }
-
 }
 
 footer {
     width: 100%;
-    min-height: 10vh;
+    height: 10vh;
     display: flex;
     justify-content: space-evenly;
     background-color: lightblue;
     align-items: center;
 
     button {
-        height: 30px;
-        padding: 5px;
+        padding: 10px;
+        border: none;
+        border-radius: 25px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
     }
 }
 
