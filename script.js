@@ -37,7 +37,7 @@ let dailyIncomesRef;
 let reportsRef;
 
 
-var firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyA0CgP6TBgWhROuPJzH5x0sXRNW2-Hqwug",
     authDomain: "expenses-tracker-179c9.firebaseapp.com",
     projectId: "expenses-tracker-179c9",
@@ -48,9 +48,9 @@ var firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
+const db = firebase.firestore();
 
-var provider = new firebase.auth.GoogleAuthProvider();
+const provider = new firebase.auth.GoogleAuthProvider();
 
 showMonth.innerHTML = `${months[month - 1]} - ${year}`
 
@@ -74,6 +74,8 @@ headerButtons[1].onclick = () => {
     dataAreas[2].style.display = "flex"
 }
 
+document.querySelector("#message button").onclick = () => document.querySelector("#message").style.display = "none"
+
 const getJSON = () => {
     const url = `https://api.astroip.co/2.99.115.173?api_key=a45dc99e-f914-4961-8009-54fca96d8819`
     const proxyUrl = `https://agile-island-79839.herokuapp.com/`
@@ -92,7 +94,6 @@ const getUser = () => {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             userId = user.uid
-            console.log(userId);
             headerButtons[0].innerHTML = `<i class="fas fa-sign-out-alt"></i>`
             headerButtons[0].value = "signOut"
             updateRef()
@@ -109,24 +110,28 @@ const getUser = () => {
 
 const updateRef = () => {
     const user = userId ? userId : userIp
+
     fixedRef = db.collection("users").doc(user).collection("Fixed Incomes-Expenses").doc(date);
     dailyExpensesRef = db.collection("users").doc(user).collection("Daily Expenses").doc(date);
     dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(date);
     reportsRef = db.collection("users").doc(user).collection("reports").doc(date);
+
     createNewUserDataBase()
     getNewDatas()
+
     const incomes = [];
     const expenses = [];
     const saved = [];
-
 
     db.collection("users").doc(user).collection("reports").orderBy("id")
         .get().then((querySnapshot) => {
             querySnapshot.docs.map((doc) => {
                 reportsList.innerHTML += `<option value="${doc.id}">${doc.id}</option>`
+
                 incomes.push(doc.data().totalIncomes);
                 expenses.push(doc.data().totalSpent);
                 saved.push(doc.data().moneySaved);
+
                 reports[0].innerHTML += `<th>${months[doc.id.charAt(1) !== "-" ? doc.id.slice(0, 2) - 1 : doc.id.charAt(0) - 1]}</th>`
                 reports[1].innerHTML += `<td>£${doc.data().totalIncomes}</td>`
                 reports[2].innerHTML += `<td>£${doc.data().totalSpent}</td>`
@@ -145,8 +150,8 @@ document.querySelector("#submitReport").addEventListener("click", () => {
     dailyExpensesRef = db.collection("users").doc(user).collection("Daily Expenses").doc(reportsList.value);
     dailyIncomesRef = db.collection("users").doc(user).collection("Daily Incomes").doc(reportsList.value);
 
-    showMonth.innerHTML = `${months[reportsList.value.charAt(1) !== "-" ? reportsList.value.slice(0, 2) - 1 : reportsList.value.charAt(0) - 1]} - ${year}`
     savedInputs = ["savings", "rent", "others", "salary"]
+    showMonth.innerHTML = `${months[reportsList.value.charAt(1) !== "-" ? reportsList.value.slice(0, 2) - 1 : reportsList.value.charAt(0) - 1]} - ${year}`
     list.innerHTML = ""
     moreList.innerHTML = ""
     dailyExpensesList.innerHTML = ""
@@ -154,12 +159,10 @@ document.querySelector("#submitReport").addEventListener("click", () => {
 
     setTimeout(getNewDatas, 1000)
     inputDatas.style.display = "none"
-
 })
 
 
 const createNewUserDataBase = () => {
-    // if (userId) {
     fixedRef.get().then(function (doc) {
         if (!doc.exists) {
             fixedRef.set({
@@ -167,12 +170,14 @@ const createNewUserDataBase = () => {
                 rent: 0,
                 salary: 0,
                 savings: 0
-            }).then(() => importPrevFixed())
+            }).then(() => {
+                !userId ? document.querySelector("#message").style.display = "block" : null
+                importPrevFixed()
+            })
         }
     }).catch(function (error) {
         console.log("Error getting document:", error);
     });
-    // }
 }
 
 const importPrevFixed = () => {
@@ -195,30 +200,23 @@ const getNewDatas = () => {
             updateInputs()
             updateValues()
         } else {
-            console.log("No such document!");
             setTimeout(getNewDatas, 1000)
         }
-    }).catch(function (error) {
-        console.log("Error getting document:", error);
-    })
+    }).catch(() => null)
 
     dailyExpensesRef.get().then(function (doc) {
         dataBaseDailyExpenses = doc.data()
         addData()
         updateInputs()
         updateValues()
-    }).catch(function (error) {
-        console.log("Error getting document:", error);
-    })
+    }).catch(() => null)
 
     dailyIncomesRef.get().then(function (doc) {
         dataBaseDailyIncomes = doc.data()
         addData()
         updateInputs()
         updateValues()
-    }).catch(function (error) {
-        console.log("Error getting document:", error);
-    })
+    }).catch(() => null)
 }
 
 const chart = new Chart(ctx, {
@@ -228,7 +226,7 @@ const chart = new Chart(ctx, {
         labels: [],
         datasets: [{
             label: 'My First dataset',
-            backgroundColor: ["blue", "red", "orange", "yellow", "lightgreen", "pink", "lightblue"],
+            backgroundColor: ["blue", "red", "orange", "yellow", "lightgreen", "pink", "lightblue", "cyan", "sandybrown", "chartreuse", "aqua", "palevioletred", "teal", "tan"],
             borderColor: 'black',
             data: []
         }]
@@ -244,14 +242,12 @@ const addData = () => {
     const dataValue = dataBaseFixed ? Object.values(dataBaseFixed) : null
     let total = dataBaseFixed ? dataBaseFixed.salary + dataBaseFixed.others : dataBaseFixed.salary;
     const moreIncomes = dataBaseDailyIncomes !== undefined && Object.values(dataBaseDailyIncomes).length ? Object.values(dataBaseDailyIncomes).reduce((a, b) => a + b) : 0
+
     let labels = [];
     let values = [];
     let dataToOrder = [];
 
-
     total = total + moreIncomes
-
-
 
     for (let i = 0; i < dataLab.length; i++) {
         dataToOrder.push([dataLab[i], dataValue[i]])
@@ -309,15 +305,12 @@ const addData = () => {
         }
     })
 
-
     chart.update();
-
 }
-
-let toSave = [];
 
 addMore.addEventListener("click", (e) => {
     e.preventDefault()
+    let toSave = [];
 
     for (let i = 0; i < dataInputs.length; i++) {
         toSave.push(dataInputs[i].value)
@@ -338,13 +331,13 @@ addMore.addEventListener("click", (e) => {
     }
 
     toSave = []
-
 })
 
 const updateInputs = () => {
     const dataLab = Object.keys(dataBaseFixed)
     const dataToAdd = []
     const savedInputs = ["rent", "savings", "others", "salary"];
+
     list.innerHTML = ""
     moreList.innerHTML = ""
     dailyExpensesList.innerHTML = ""
@@ -382,7 +375,6 @@ const updateInputs = () => {
     }
 }
 
-
 const deleteValue = (e, whichRef) => {
     let reference;
     if (whichRef === "expenses") { reference = dailyExpensesRef }
@@ -400,8 +392,6 @@ const deleteValue = (e, whichRef) => {
 dailyExpensesList.addEventListener("click", (e) => deleteValue(e, "expenses"))
 dailyIncomesList.addEventListener("click", (e) => deleteValue(e, "incomes"))
 list.addEventListener("click", (e) => deleteValue(e, "bills"))
-
-
 
 const updateValues = () => {
     const dataLab = Object.keys(dataBaseFixed)
@@ -426,46 +416,37 @@ const updateValues = () => {
 
 const unused = [];
 
-class FixedIncomes {
-    constructor(value, name) {
-        this.value = Number(value);
-        this.name = name;
-    }
+addToDatabase = (value, name) => {
+    fixedRef.get().then(function (doc) {
+        if (doc.exists) {
+            fixedRef.update({
+                [name]: Number(value)
+            })
+        } else {
+            fixedRef.set({
+                [name]: Number(value)
+            })
+            console.log(userId);
+            unused.push({ [name]: Number(value) })
+            setTimeout(recall, 1000)
+        }
 
-    addToDatabase(value, name) {
-        fixedRef.get().then(function (doc) {
-            if (doc.exists) {
-                fixedRef.update({
-                    [name]: Number(value)
-                })
-            } else {
-                fixedRef.set({
-                    [name]: Number(value)
-                })
-                console.log(userId);
-                unused.push({ [name]: Number(value) })
-                setTimeout(recall, 1000)
-            }
-
-        }).catch(function (error) {
-            console.log("Error getting document:", error);
-        });
-    }
+    }).catch(function (error) {
+        console.log("Error getting document:", error);
+    });
 }
+
 const recall = () => {
     unused.forEach(un => {
-        const something = new FixedIncomes
-        something.addToDatabase(Object.values(un), Object.keys(un))
+        addToDatabase(Object.values(un), Object.keys(un))
     })
 }
-
 
 submitData.forEach(submit => {
     submit.addEventListener("click", () => {
         for (let i = 0; i < dataInputs.length; i++) {
             if (dataInputs[i].value !== "") {
-                const something = new FixedIncomes
-                something.addToDatabase(dataInputs[i].value, dataInputs[i].name)
+                addToDatabase(dataInputs[i].value, dataInputs[i].name)
             }
         }
 
@@ -503,14 +484,12 @@ addNewDailyInputs[2].addEventListener("click", (e) => {
 
     setTimeout(getNewDatas, 2000)
     setTimeout(clearInputs, 500)
-
 })
 
 const clearInputs = () => {
     addNewDailyInputs[0].value = ""
     addNewDailyInputs[1].value = ""
 }
-
 
 buttons.forEach(button => {
     button.addEventListener("click", () => {
@@ -530,6 +509,5 @@ buttons.forEach(button => {
 })
 
 closeWindow.forEach(button => button.addEventListener("click", () => inputDatas.style.display = "none"))
-
 
 getUser()

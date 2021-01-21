@@ -65,8 +65,28 @@ main {
           align-items: center;
 }
 
+main #message {
+  width: 60%;
+  background-color: lightblue;
+  border: 5px solid beige;
+  height: auto;
+  text-align: center;
+  display: none;
+}
+
+main #message button {
+  margin: 10px 0;
+  border: none;
+  padding: 5px;
+  background-color: beige;
+  border-radius: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 main .top {
-  min-height: 70vh;
+  min-height: 75vh;
   width: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -76,9 +96,6 @@ main .top {
   -webkit-box-pack: space-evenly;
       -ms-flex-pack: space-evenly;
           justify-content: space-evenly;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
   background-color: beige;
 }
 
@@ -101,7 +118,8 @@ main .top button svg {
 
 main .top .resume {
   min-width: 400px;
-  max-height: 70vh;
+  max-height: 75vh;
+  font-size: 18px;
   overflow: auto;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -110,6 +128,28 @@ main .top .resume {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+
+main .top .resume::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px grey;
+  -webkit-box-shadow: inset 0 0 6px #01A4CD;
+  border-radius: 10px;
+  background-color: #f5f5f5;
+}
+
+main .top .resume::-webkit-scrollbar {
+  width: 6px;
+  background-color: #f5f5f5;
+}
+
+main .top .resume::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  box-shadow: inset 0 0 6px grey;
+  -webkit-box-shadow: inset 0 0 6px #01A4CD;
+  background-color: grey;
 }
 
 main .top .resume div {
@@ -125,11 +165,11 @@ main .top .chart {
   height: auto;
   width: 600px;
   text-align: center;
-  margin-bottom: 30px;
+  margin-top: 100px;
 }
 
 main .top .chart h2 {
-  margin: 20px 0;
+  margin-bottom: 10px;
 }
 
 main .inputData {
@@ -272,8 +312,11 @@ footer button {
   cursor: pointer;
 }
 
-@media only screen and (max-width: 1000px) {
-  .top .resume {
+@media only screen and (max-width: 1200px) {
+  main .top {
+    padding: 0;
+  }
+  main .top .resume {
     width: 100%;
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
@@ -287,11 +330,11 @@ footer button {
     row-gap: 20px;
     margin-bottom: 20px;
   }
-  .top .chart {
+  main .top .chart {
     width: 100%;
     margin: 30px auto;
   }
-  .top .chart canvas {
+  main .top .chart canvas {
     max-width: 600px;
     margin: 0 auto;
   }

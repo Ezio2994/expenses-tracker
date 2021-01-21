@@ -46,14 +46,32 @@ main {
     justify-content: space-around;
     align-items: center;
 
+    #message {
+        width: 60%;
+        background-color: lightblue;
+        border: 5px solid beige;
+        height: auto;
+        text-align: center;
+        display: none;
+
+        button {
+            margin: 10px 0;
+            border: none;
+            padding: 5px;
+            background-color: beige;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    }
 
     .top {
-        min-height: 70vh;
+        min-height: 75vh;
         width: 100%;
         display: flex;
         flex-wrap: wrap-reverse;
         justify-content: space-evenly;
-        align-items: center;
         background-color: beige;
 
         input {
@@ -74,10 +92,31 @@ main {
 
         .resume {
             min-width: 400px;
-            max-height: 70vh;
+            max-height: 75vh;
+            font-size: 18px;
             overflow: auto;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+
+            &::-webkit-scrollbar-track {
+                box-shadow: inset 0 0 6px grey;
+                -webkit-box-shadow: inset 0 0 6px #01A4CD;
+                border-radius: 10px;
+                background-color: #f5f5f5;
+            }
+            
+            &::-webkit-scrollbar {
+                width: 6px;
+                background-color: #f5f5f5;
+            }
+            
+            &::-webkit-scrollbar-thumb {
+                border-radius: 10px;
+                box-shadow: inset 0 0 6px grey;
+                -webkit-box-shadow: inset 0 0 6px #01A4CD;
+                background-color: grey;
+            }
 
             div {
                 width: 300px;
@@ -93,10 +132,10 @@ main {
             height: auto;
             width: 600px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-top: 100px;
 
             h2 {
-                margin: 20px 0;
+                margin-bottom: 10px;
             }
         }
     }
@@ -217,24 +256,27 @@ footer {
     }
 }
 
-@media only screen and (max-width: 1000px) {
-    .top {
-        .resume {
-            width: 100%;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: space-evenly;
-            row-gap: 20px;
-            margin-bottom: 20px;
-        }
+@media only screen and (max-width: 1200px) {
+    main {
+        .top {
+            padding: 0;
+            .resume {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-evenly;
+                row-gap: 20px;
+                margin-bottom: 20px;
+            }
 
-        .chart {
-            width: 100%;
-            margin: 30px auto;
+            .chart {
+                width: 100%;
+                margin: 30px auto;
 
-            canvas {
-                max-width: 600px;
-                margin: 0 auto;
+                canvas {
+                    max-width: 600px;
+                    margin: 0 auto;
+                }
             }
         }
     }
