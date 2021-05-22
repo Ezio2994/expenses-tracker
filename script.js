@@ -101,7 +101,7 @@ const getJSON = () => {
   fetch(proxyUrl + url)
     .then((res) => res.json())
     .then((res) => {
-      userIp = res.requester_ip;
+      userIp = res.ip_address;
     })
     .then(() => updateRef())
     .catch((err) => {
